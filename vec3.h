@@ -1,10 +1,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <cmath>
-#include <iostream>
-
-using std::sqrt;
+#include "RayTracing.h"
 
 class vec3 {
 public:
@@ -78,7 +75,7 @@ inline vec3 operator * (const vec3& v, double t) {
 }
 
 inline vec3 operator / (const vec3& v, double t) {
-	return (t/t) * v;
+	return (1/t) * v;
 }
 
 inline double dot (const vec3& u, const vec3& v) {
