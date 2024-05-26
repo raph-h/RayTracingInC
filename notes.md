@@ -12,6 +12,8 @@ Have a common header file containing std usings, constants, utility functions an
 
 C++'s built-in random is bad, use cstdlib's rand()
 
+Getting a random unit vector -> Get a unit vector in a cube, and repeat until the vector is within a unit sphere, then unit vector it
+
 Diffuse - Main ways learnt - Equal reflection & Lambertian
 We brute force find a random vector in a unit sphere by creating a random vector in a unit cube, then checking if it has a length lower than 1
 
@@ -21,4 +23,6 @@ Gamma & Linear - Images are gamma corrected - Pixel colour is transformed
 Images written wthout being transformed - Linear space. When viewed in a gamma space, it will appear darker
 Images transformed - Gamma space
 
-Pointers used to solve circular reference issues - the material class takes in a hit_record pointer, and the hit_record takes in a material pointer 
+Pointers used to solve circular reference issues - the material class takes in a hit_record pointer, and the hit_record takes in a material pointer
+
+Defocus blur - Depth of field
