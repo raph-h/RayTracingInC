@@ -4,7 +4,7 @@ vector class new operations - inline vec3 operator \[insert operator here](param
 
 Normals - Can be made to point out of a surface (geometrically determined) or always against incident ray (determined during colouring)
 
-shared_ptr<type> - Shared pointer to an allocated type
+shared_ptr<type> - Shared pointer to an allocated type - less performant than a normal pointer, so hit_record uses non-shared pointers for increased performance_
 make_shared<thing>(thing_constructor_params ...) - Allocates a new instance of type thing
 e.g. shared_ptr<double> double_ptr = make_shared<double>(0.37);
 
@@ -26,3 +26,6 @@ Images transformed - Gamma space
 Pointers used to solve circular reference issues - the material class takes in a hit_record pointer, and the hit_record takes in a material pointer
 
 Defocus blur - Depth of field
+
+Potential improvements
+Triangles, Parallelist, Shadow rays

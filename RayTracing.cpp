@@ -36,18 +36,22 @@ int main()
 					// Diffuse
 					colour albedo = colour::random() * colour::random();
 					sphere_material = make_shared<lambertian>(albedo);
+					point3 end_center = center + vec3(0, random_double(0, 0.5), 0);
+					world.add(make_shared<sphere>(center, end_center, 0.2, sphere_material));
+
 				}
 				else if (choose_mat < 0.95) {
 					// Metal
 					colour albedo = colour::random(0.5, 1);
 					double fuzz = random_double(0, 0.5);
 					sphere_material = make_shared<metal>(albedo, fuzz);
+					world.add(make_shared<sphere>(center, 0.2, sphere_material));
 				}
 				else {
 					// Glass
 					sphere_material = make_shared<dielectric>(1.5);
+					world.add(make_shared<sphere>(center, 0.2, sphere_material));
 				}
-				world.add(make_shared<sphere>(center, 0.2, sphere_material));
 			}
 		}
 	}
@@ -64,9 +68,9 @@ int main()
 	// Camera
 	camera cam;
 	cam.aspect_ratio = 16.0 / 9.0;
-	cam.image_width = 1200; // 400, 1000
-	cam.samples_per_pixel = 5; // 100, 5000
-	cam.max_depth = 500; // 50, 500
+	cam.image_width = 400; // 400, 1000
+	cam.samples_per_pixel = 100; // 100, 5000
+	cam.max_depth = 50; // 50, 500
 
 	cam.vfov = 20;
 	cam.lookfrom = point3(13, 2, 3);

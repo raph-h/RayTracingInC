@@ -94,7 +94,9 @@ private:
 		vec3 pixel_sample = pixel00_loc + ((i + offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);
 		vec3 ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
 		vec3 ray_direction = pixel_sample - ray_origin;
-		return ray(ray_origin, ray_direction);
+		double ray_time = random_double();
+
+		return ray(ray_origin, ray_direction, ray_time);
 	}
 
 	vec3 sample_square() const {
@@ -122,7 +124,7 @@ private:
 		if (world.hit(r, interval(0.001, infinity), rec)) {
 			ray scattered;
 			colour attenuation;
-			if (rec.mat->scatter(r, rec, attenuation, scattered))
+			if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
 				return attenuation * ray_colour(scattered, depth - 1, world);
 			return colour(0, 0, 0);
 		}
