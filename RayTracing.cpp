@@ -1,15 +1,19 @@
 ﻿// RayTracing.cpp : Defines the entry point for the application.
 
+#include <chrono>
 
-#include "RayTracing.h"
-#include "camera.h"
-#include "hittable.h"
-#include "hittable_list.h"
-#include "material.h"
-#include "sphere.h"
+#include "RayTracing.hpp"
+#include "camera.hpp"
+#include "hittable.hpp"
+#include "hittable_list.hpp"
+#include "material.hpp"
+#include "sphere.hpp"
 
 int main()
 {
+	// Time
+	const auto start_time = std::chrono::steady_clock::now();
+
 	// World
 	hittable_list world;
 
@@ -38,7 +42,6 @@ int main()
 					sphere_material = make_shared<lambertian>(albedo);
 					point3 end_center = center + vec3(0, random_double(0, 0.5), 0);
 					world.add(make_shared<sphere>(center, end_center, 0.2, sphere_material));
-
 				}
 				else if (choose_mat < 0.95) {
 					// Metal
@@ -82,5 +85,10 @@ int main()
 
 	// Render
 	cam.render(world);
+
+	const auto end_time = std::chrono::steady_clock::now();
+	const auto elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+	std::clog << "elapsed time: " << elapsed_seconds / 1000.0 << "s\n";
+
 	return 0;
 }

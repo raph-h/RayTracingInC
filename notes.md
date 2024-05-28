@@ -27,5 +27,7 @@ Pointers used to solve circular reference issues - the material class takes in a
 
 Defocus blur - Depth of field
 
+Files should be .hpp as .h is more for C while .hpp is for C++
+
 Potential improvements
 Triangles, Parallelist, Shadow rays
