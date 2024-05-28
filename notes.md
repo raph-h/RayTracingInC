@@ -29,5 +29,8 @@ Defocus blur - Depth of field
 
 Files should be .hpp as .h is more for C while .hpp is for C++
 
+BVH really improved render speeds, I achieved a 10 times faster render
+And with improvements to the bounding box axis determination, about a 11.8 times faster render
+
 Potential improvements
 Triangles, Parallelist, Shadow rays

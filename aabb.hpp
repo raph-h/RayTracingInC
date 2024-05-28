@@ -1,7 +1,7 @@
-#ifndef AAB_H
+#ifndef AABB_H
 #define AABB_H
 
-#include "RayTracing.h"
+#include "RayTracing.hpp"
 
 class aabb {
 public:
@@ -16,6 +16,12 @@ public:
 		x = (a[0] <= b[0]) ? interval(a[0], b[0]) : interval(b[0], a[0]);
 		y = (a[1] <= b[1]) ? interval(a[1], b[1]) : interval(b[1], a[1]);
 		z = (a[2] <= b[2]) ? interval(a[2], b[2]) : interval(b[2], a[2]);
+	}
+
+	aabb(const aabb& box1, const aabb& box2) {
+		x = interval(box1.x, box2.x);
+		y = interval(box1.y, box2.y);
+		z = interval(box1.z, box2.z);
 	}
 
 	const interval& axis_interval(int n) const {
@@ -71,15 +77,15 @@ public:
 		};
 
 		const double t_smaller[3] = {
-			std::fmin(t0[0], t1[0]),
-			std::fmin(t0[1], t1[1]),
-			std::fmin(t0[2], t1[2])
+			std::min(t0[0], t1[0]),
+			std::min(t0[1], t1[1]),
+			std::min(t0[2], t1[2])
 		};
 
 		const double t_larger[3] = {
-			std::fmax(t0[0], t1[0]),
-			std::fmax(t0[1], t1[1]),
-			std::fmax(t0[2], t1[2])
+			std::max(t0[0], t1[0]),
+			std::max(t0[1], t1[1]),
+			std::max(t0[2], t1[2])
 		};
 
 		ray_t.min = std::max({ ray_t.min, t_smaller[0], t_smaller[1], t_smaller[2] });
@@ -87,6 +93,19 @@ public:
 		return (ray_t.min < ray_t.max);
 		*/
 	}
+
+	int longest_axis() const {
+		// Returns the index of the longest axis of the bounding box
+		if (x.size() > y.size())
+			return x.size() > z.size() ? 0 : 2;
+		else
+			return y.size() > z.size() ? 1 : 2;
+	}
+	
+	static const aabb empty, universe;
 };
+
+const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
+const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);
 
 #endif

@@ -13,8 +13,10 @@ public:
 
 	interval(const interval& a, const interval& b) {
 		// Create the interval tightly enclosing the two input intervals
-		min = a.min <= b.min ? a.min : b.min;
-		max = a.max >= b.max ? a.max : b.max;
+		//min = a.min <= b.min ? a.min : b.min;
+		//max = a.max >= b.max ? a.max : b.max;
+		min = std::min(a.min, b.min); // IMRPOVED: Easier to write code
+		max = std::max(a.max, b.max);
 	}
 
 	double size() const {

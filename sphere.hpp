@@ -20,7 +20,7 @@ public:
 		vec3 rvec = vec3(radius, radius, radius);
 		aabb box1(start_center - rvec, start_center + rvec);
 		aabb box2(end_center - rvec, end_center + rvec);
-		//bbox = aabb(box1, box2);
+		bbox = aabb(box1, box2);
 	}
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
