@@ -42,7 +42,6 @@ int main()
 					// Diffuse
 					colour albedo = colour::random() * colour::random();
 					sphere_material = make_shared<lambertian>(albedo);
-					point3 end_center = center + vec3(0, random_double(0, 0.5), 0);
 					world.add(make_shared<sphere>(center, end_center, 0.2, sphere_material));
 				}
 				else if (choose_mat < 0.95) {
