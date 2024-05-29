@@ -12,7 +12,9 @@ public:
 	vec3 normal;
 	//shared_ptr<material> mat;
 	material* mat_ptr; // IMPROVED: By using a normal pointer, we improve performance
-	double t;
+	double t; // t for calculating when the rays collide - the t value
+	double u; // u and v for textures
+	double v;
 	bool front_face;
 
 	void set_face_normal(const ray& r, const vec3& outward_normal) {

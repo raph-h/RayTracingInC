@@ -33,19 +33,20 @@ public:
 	bool hit(const ray& r, interval ray_t) const {
 		const point3& ray_orig = r.origin();
 		const vec3& ray_dir = r.direction();
-
+		
 		for (int axis = 0; axis < 3; axis++) {
 			const interval& ax = axis_interval(axis);
 			const double adinv = 1.0 / ray_dir[axis];
 
 			double t0 = (ax.min - ray_orig[axis]) * adinv;
 			double t1 = (ax.max - ray_orig[axis]) * adinv;
-
-			/*if (adinv < 0)
-				std::swap(t0, t1);
-				ray_t.min = (t0 > ray_t.min) ? t0 : ray_t.min;
-				ray_t.max = (t1 < ray_t.max) ? t1 : ray_t.max;
-			*/
+			
+			// Somehow also slower
+			//if (adinv < 0)
+			//	std::swap(t0, t1);
+			//ray_t.min = (t0 > ray_t.min) ? t0 : ray_t.min;
+			//ray_t.max = (t1 < ray_t.max) ? t1 : ray_t.max;
+			
 			if (t0 < t1) {
 				if (t0 > ray_t.min) ray_t.min = t0;
 				if (t1 < ray_t.max) ray_t.max = t1;
@@ -59,9 +60,9 @@ public:
 				return false;
 		}
 		return true;
-		//TODO: Test if this is better
 		/*
-		// IMPROVED: Faster method using vector instructions
+		// ALTERNATE: "Faster" method using vector instructions
+		// TESTED on 28/5/2024 - Took 264.061s vs 84.556s ~ 3 times slower
 		// This method is a bit faster because of modern CPUs (vector instructions) and newer compilers (doing auto-vectorization)
 		// Adapted from: https://medium.com/@bromanz/another-view-on-the-classic-ray-aabb-intersection-algorithm-for-bvh-traversal-41125138b525
 		const double t0[3] = {

@@ -7,14 +7,14 @@ class sphere : public hittable {
 public:
 	// Stationary Sphere
 	sphere(const point3& center, double radius, shared_ptr<material> mat)
-		: start_center(center), radius(fmax(0, radius)), mat(mat), is_moving(false) {
+		: start_center(center), radius(std::max(0.0, radius)), mat(mat), is_moving(false) {
 		vec3 rvec = vec3(radius, radius, radius);
 		bbox = aabb(start_center - rvec, start_center + rvec);
 	}
 	
 	// Moving Sphere
 	sphere(const point3& start_center, const point3& end_center, double radius, shared_ptr<material> mat)
-		: start_center(start_center), radius(fmax(0, radius)), mat(mat), is_moving(true) {
+		: start_center(start_center), radius(std::max(0.0, radius)), mat(mat), is_moving(true) {
 		center_vec = end_center - start_center;
 
 		vec3 rvec = vec3(radius, radius, radius);
@@ -48,6 +48,7 @@ public:
 		rec.p = r.at(rec.t);
 		vec3 outward_normal = (rec.p - center) / radius;
 		rec.set_face_normal(r, outward_normal);
+		get_sphere_uv(outward_normal, rec.u, rec.v); // Set's the u and v values of rec
 		rec.mat_ptr = mat.get();
 
 		return true;
@@ -69,6 +70,20 @@ private:
 	point3 sphere_center(double time) const {
 		// Linearly interpolate from start_center to end_center according to time, where t=0 yields start_center and t=1 yields end_center
 		return start_center + time * center_vec;
+	}
+
+	static void get_sphere_uv(const point3& p, double& u, double& v) {
+		// p: a given point on the sphere of radius one, centered at the origin
+		// u: returned value [0, 1] of angle around the Y axis from X = -1
+		// v: returned value [0, 1] of angle from Y = -1 to Y = +1
+		// <1 0 0> yields <0.50 0.50>	<-1  0  0> yields <0.00 0.50>
+		// <0 1 0> yields <0.50 1.00>	< 0 -1  0> yields <0.50 0.00>
+		// <0 0 1> yields <0.25 0.50>	< 0  0 -1> yields <0.75 0.50>
+		double theta = acos(-p.y());
+		double phi = atan2(-p.z(), p.x()) + pi;
+
+		u = phi / (2 * pi);
+		v = theta / pi;
 	}
 };
 
