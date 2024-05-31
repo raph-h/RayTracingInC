@@ -2,6 +2,8 @@
 #define TEXTURE_H
 
 #include "RayTracing.hpp"
+
+#include "perlin.hpp"
 #include "rtw_stb_image.hpp"
 
 class texture {
@@ -68,6 +70,27 @@ public:
 	}
 private:
 	rtw_image image;
+};
+
+class noise_texture : public texture {
+public:
+	noise_texture() : scale(1.0) {}
+
+	noise_texture(double scale) : scale(scale) {}
+
+	colour value(double u, double v, const point3& p) const override {
+		// Perlin interpolate can return negative values [-1, +1], so we must map to [0, 1]
+		// return colour(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
+		
+		// Perlin noise with turbulence
+		// return colour(1, 1, 1) * noise.noise_turbulence(p, 7);
+
+		// Marble like
+		return colour(0.5, 0.5, 0.5) * (1 + sin(scale * p.z() + 10 * noise.noise_turbulence(p, 7)));
+	}
+private:
+	perlin noise;
+	double scale;
 };
 
 #endif

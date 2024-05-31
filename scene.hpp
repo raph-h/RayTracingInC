@@ -144,10 +144,8 @@ void checkered_spheres() {
 	cam.render(world);
 }
 
-
 void earth() {
 	// World
-
 	shared_ptr<image_texture> earth_texture = make_shared<image_texture>("earthmap.jpg");
 	shared_ptr<lambertian> earth_surface = make_shared<lambertian>(earth_texture);
 	shared_ptr<sphere> globe = make_shared<sphere>(point3(0.0, 0.0, 0.0), 2, earth_surface);
@@ -168,5 +166,32 @@ void earth() {
 
 	// Render
 	cam.render(hittable_list(globe));
+}
+
+void perlin_spheres() {
+	// World
+	hittable_list world;
+
+	shared_ptr<noise_texture> perlin_texture = make_shared<noise_texture>(4.0);
+	shared_ptr<lambertian> perlin_surface = make_shared<lambertian>(perlin_texture);
+	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, perlin_surface));
+	world.add(make_shared<sphere>(point3(0, 2, 0), 2, perlin_surface));
+
+	// Camera
+	camera cam;
+	cam.aspect_ratio = 16.0 / 9.0;
+	cam.image_width = 400;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 50;
+
+	cam.vfov = 20;
+	cam.lookfrom = point3(13, 2, 3);
+	cam.lookat = point3(0, 0, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0.0;
+
+	// Render
+	cam.render(world);
 }
 #endif

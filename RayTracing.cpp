@@ -26,6 +26,9 @@ int main(int argc, char *argv[])
 		case 4:
 			SCENE_H::earth();
 			break;
+		case 5:
+			SCENE_H::perlin_spheres();
+			break;
 		default:
 			SCENE_H::three_spheres();
 			break;
