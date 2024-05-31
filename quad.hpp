@@ -21,6 +21,7 @@ public:
 		aabb bbox_diagonal1 = aabb(Q, Q + u + v);
 		aabb bbox_diagonal2 = aabb(Q + u, Q + v);
 		bbox = aabb(bbox_diagonal1, bbox_diagonal2);
+		bbox.pad_to_minimums();
 	}
 
 	aabb bounding_box() const override { return bbox; }
@@ -38,12 +39,31 @@ public:
 		if (!ray_t.contains(t))
 			return false;
 
-		point3 intersection = r.at(t);
-
+		// Determine the hit point lies within the planar shape using its plane coordinates
+		const point3 intersection = r.at(t);
+		// See derivatation in part 6.5
+		const vec3 planar_hitpt_vector = intersection - Q;
+		const double alpha = dot(w, cross(planar_hitpt_vector, v));
+		const double beta = dot(w, cross(u, planar_hitpt_vector));
+		if (!is_interior(alpha, beta, rec, intersection))
+			return false;
+		
+		// Ray hits the 2D shape, set the rest of the hit record data and return true
 		rec.t = t;
 		rec.p = intersection;
 		rec.mat_ptr = mat.get();
 		rec.set_face_normal(r, normal);
+		return true;
+	}
+
+	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const {
+		interval unit_interval = interval(0, 1);
+		// Given the hit point in plane coordinates, return false if it is outside the primitive, otherwise set the hit record UV coordinates and return true
+
+		if (!unit_interval.contains(a) || !unit_interval.contains(b))
+			return false;
+		rec.u = a;
+		rec.v = b;
 		return true;
 	}
 private:
@@ -56,4 +76,62 @@ private:
 	double D; //Ax+By+Cz=D, where n = nxv
 };
 
+class triangle : public quad {
+public:
+	triangle(const point3& origin, const vec3& a, const vec3& b, shared_ptr <material> mat) : quad(origin, a, b, mat) {}
+
+	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const override {
+		if ((a + b) > 1 || a < 0 || b < 0)
+			return false;
+		rec.u = a;
+		rec.v = b;
+		return true;
+	}
+};
+
+class ellipse : public quad {
+public:
+	ellipse(const point3& centre, const vec3& a, const vec3& b, shared_ptr <material> mat) : quad(centre, a, b, mat) {}
+
+	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const override {
+		if ((a * a + b * b) > 1)
+			return false;
+		rec.u = a / 2 + 0.5;
+		rec.v = b / 2 + 0.5;
+		return true;
+	}
+};
+
+class annulus : public quad {
+public:
+	annulus(const point3& center, const vec3& a, const vec3& b, double radius, shared_ptr<material> mat) : quad(center, a, b, mat), radius(radius) {}
+	
+	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const override {
+		double distance = a * a + b * b;
+		if (distance > 1 || distance < radius * radius)
+			return false;
+		rec.u = a / 2 + 0.5;
+		rec.v = b / 2 + 0.5;
+		return true;
+	}
+private:
+	double radius;
+};
+
+class texture_quad : public quad {
+public:
+	texture_quad(const point3& Q, const vec3& u, const vec3& v, shared_ptr<texture> tex, shared_ptr<material> mat) : quad(Q, u, v, mat), tex(tex) {}
+
+	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const override {
+		interval unit_interval = interval(0, 1);
+
+		if (tex->value(a, b, intersection).length_squared() < 0.5 || !unit_interval.contains(a) || !unit_interval.contains(b)) // Does not hit if the texture is not white
+			return false;
+		rec.u = a;
+		rec.v = b;
+		return true;
+	}
+private:
+	shared_ptr<texture> tex;
+};
 #endif

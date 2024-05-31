@@ -29,6 +29,12 @@ int main(int argc, char *argv[])
 		case 5:
 			SCENE_H::perlin_spheres();
 			break;
+		case 6:
+			SCENE_H::quads();
+			break;
+		case 7:
+			SCENE_H::quads2();
+			break;
 		default:
 			SCENE_H::three_spheres();
 			break;

@@ -93,4 +93,30 @@ private:
 	double scale;
 };
 
+
+class mandelbrot_texture : public texture { // TODO: FIX THIS
+public:
+	mandelbrot_texture() : max_iterations(1000) {}
+
+	mandelbrot_texture(int max_iterations) : max_iterations(max_iterations) {}
+
+	colour value(double u, double v, const point3& p) const override {
+		// Mandelbrot set equation
+		double x0 = (u * 5 - 2.5);
+		double y0 = (v * 5 - 2.5);
+		double x = 0.0;
+		double y = 0.0;
+		int iteration = 0;
+		while (x * x + y * y <= 2 * 2 && iteration < max_iterations) {
+			double xtmp = x * x + y * y + x0;
+			y = 2 * x * y + y0;
+			x = xtmp;
+			iteration++;
+		}
+		return colour(log(iteration) / 10.0, 1, 1);
+	}
+private:
+	int max_iterations;
+};
+
 #endif
