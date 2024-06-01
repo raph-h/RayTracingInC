@@ -35,6 +35,18 @@ int main(int argc, char *argv[])
 		case 7:
 			SCENE_H::quads2();
 			break;
+		case 8:
+			SCENE_H::mandelbrot();
+			break;
+		case 9:
+			SCENE_H::simple_light();
+			break;
+		case 10:
+			SCENE_H::cornell_box();
+			break;
+		case 11:
+			SCENE_H::cornell_box2();
+			break;
 		default:
 			SCENE_H::three_spheres();
 			break;

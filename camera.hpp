@@ -12,6 +12,8 @@ public:
 	int image_width = 100; // Rendered image width in pixel count
 	int samples_per_pixel = 10; // Count of random samples for each pixel
 	int max_depth = 10; // Maximum number of ray bounces into scene (prevents recusion)
+	colour background_bottom = colour(1.0, 1.0, 1.0); // Scene background colour on the bottom
+	colour background_top = colour(0.5, 0.7, 1.0); // Scene background colour on the top
 
 	double vfov = 90; // Verticla view angle (field of view)
 	point3 lookfrom = point3(0, 0, 0); // Point camera is looking from
@@ -121,18 +123,22 @@ private:
 			return colour(0, 0, 0);
 		
 		hit_record rec;
-		if (world.hit(r, interval(0.001, infinity), rec)) {
-			ray scattered;
-			colour attenuation;
-			if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
-				return attenuation * ray_colour(scattered, depth - 1, world);
-			return colour(0, 0, 0);
+		if (!world.hit(r, interval(0.001, infinity), rec)) {
+			vec3 unit_direction = unit_vector(r.direction());
+			double a = 0.5 * (unit_direction.y() + 1.0);
+			// Linear interpolation between background bottom and top
+			return (1.0 - a) * background_bottom + a * background_top;
 		}
 
-		vec3 unit_direction = unit_vector(r.direction());
-		double a = 0.5 * (unit_direction.y() + 1.0);
-		// Linear interpolation between white and blue
-		return (1.0 - a) * colour(1.0, 1.0, 1.0) + a * colour(0.5, 0.7, 1.0);
+		ray scattered;
+		colour attenuation;
+		colour emission_colour = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+		if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+			return emission_colour;
+		
+		colour scatter_colour = attenuation * ray_colour(scattered, depth - 1, world);
+
+		return emission_colour + scatter_colour;
 	}
 };
 

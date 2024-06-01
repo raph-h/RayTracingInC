@@ -10,6 +10,10 @@ class material {
 public:
 	virtual ~material() = default;
 
+	virtual colour emitted(double u, double v, const point3& p) const {
+		return colour(0, 0, 0);
+	}
+
 	virtual bool scatter(const ray& r_in, const hit_record& rec, colour& attenuation, ray& scattered) const {
 		return false;
 	}
@@ -122,6 +126,18 @@ private:
 		r = r * r;
 		return r + (1 - r) * beta; // std::pow((1 - cosine), 5);
 	}
+};
+
+class diffuse_light : public material {
+public:
+	diffuse_light(shared_ptr<texture> tex) : tex(tex) {}
+	diffuse_light(const colour& emit) : tex(make_shared<solid_colour>(emit)) {}
+
+	colour emitted(double u, double v, const point3& p) const override {
+		return tex->value(u, v, p);
+	}
+private:
+		shared_ptr<texture> tex;
 };
 
 #endif

@@ -94,29 +94,35 @@ private:
 };
 
 
-class mandelbrot_texture : public texture { // TODO: FIX THIS
+class mandelbrot_texture : public texture {
 public:
-	mandelbrot_texture() : max_iterations(1000) {}
-
-	mandelbrot_texture(int max_iterations) : max_iterations(max_iterations) {}
+	mandelbrot_texture() : max_limit(1000) {}
+	mandelbrot_texture(int max_limit) : max_limit(max_limit) {}
 
 	colour value(double u, double v, const point3& p) const override {
 		// Mandelbrot set equation
-		double x0 = (u * 5 - 2.5);
-		double y0 = (v * 5 - 2.5);
-		double x = 0.0;
-		double y = 0.0;
-		int iteration = 0;
-		while (x * x + y * y <= 2 * 2 && iteration < max_iterations) {
-			double xtmp = x * x + y * y + x0;
-			y = 2 * x * y + y0;
-			x = xtmp;
-			iteration++;
-		}
-		return colour(log(iteration) / 10.0, 1, 1);
+		double x = (u * 4 - 2);
+		double y = (v * 4 - 2);
+		int value = mandle(x, y);
+		double q = static_cast<double>(value) / max_limit;
+		return colour(q, q, q);
 	}
 private:
-	int max_iterations;
+	int max_limit;
+	int mandle(double real, double imag) const {
+		int limit = max_limit;
+		double zReal = real;
+		double zImag = imag;
+		for (int i = 0; i < limit; ++i) {
+			double r2 = zReal * zReal;
+			double i2 = zImag * zImag;
+			if (r2 + i2 > 4.0) return i;
+
+			zImag = 2.0 * zReal * zImag + imag;
+			zReal = r2 - i2 + real;
+		}
+		return limit;
+	}
 };
 
 #endif

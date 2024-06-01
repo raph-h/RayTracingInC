@@ -269,4 +269,134 @@ void quads2() {
 	// Render
 	cam.render(world);
 }
+
+
+void mandelbrot() {
+	// World
+	hittable_list world;
+
+	// Quads
+	world.add(make_shared<quad>(point3(-30, -25, -1), vec3(50, 0, 0), vec3(0, 50, 0), make_shared<lambertian>(make_shared<mandelbrot_texture>())));
+
+	// Camera
+	camera cam;
+	cam.aspect_ratio = 0.5;
+	cam.image_width = 500;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 50;
+
+	cam.vfov = 25;
+	cam.lookfrom = point3(0, 0, 9);
+	cam.lookat = point3(0, 0, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0.0;
+
+	// Render
+	cam.render(world);
+}
+
+void simple_light() {
+	hittable_list world;
+
+	shared_ptr<noise_texture> pertex = make_shared<noise_texture>(4);
+	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertex)));
+	world.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertex)));
+
+	shared_ptr<diffuse_light> difflight = make_shared<diffuse_light>(colour(4, 4, 4));
+	world.add(make_shared<sphere>(point3(0, 7, 0), 2, difflight));
+	world.add(make_shared<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), difflight));
+
+	camera cam;
+
+	cam.aspect_ratio = 16.0 / 9.0;
+	cam.image_width = 400;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 500;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 20;
+	cam.lookfrom = point3(26, 3, 6);
+	cam.lookat = point3(0, 2, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(world);
+}
+
+void cornell_box() {
+	hittable_list world;
+
+	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(15, 15, 15));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(world);
+}
+
+
+void cornell_box2() {
+	hittable_list world;
+
+	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(15, 15, 15));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
+	world.add(make_shared<sphere>(point3(343, 80, 343), 80.0, glass));
+	shared_ptr<lambertian> blue = make_shared<lambertian>(colour(0.12, 0.45, 0.85));
+	world.add(make_shared<sphere>(point3(200, 50, 100), 50.0, blue));
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 100000;
+	cam.max_depth = 1000;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(world);
+}
 #endif
