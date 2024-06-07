@@ -5,14 +5,33 @@
 
 #include "bvh.hpp"
 #include "camera.hpp"
+#include "constant_medium.hpp"
 #include "hittable.hpp"
 #include "hittable_list.hpp"
 #include "material.hpp"
 #include "quad.hpp"
 #include "sphere.hpp"
+#include "box.hpp"
 #include "texture.hpp"
 
-void three_spheres() { //TODO Fix it so it looks the same as original
+class scene {
+public:
+	scene(camera cam, hittable_list world) : cam(cam), world(world) {}
+
+	void render() {
+		cam.render(world);
+	}
+	void high_res_render(int samples) {
+		cam.samples_per_pixel = samples;
+		cam.max_depth = 500;
+		cam.render(world);
+	}
+private:
+	camera cam;
+	hittable_list world;
+};
+
+scene three_spheres() { //TODO Fix it so it looks the same as original
 	// World
 	hittable_list world;
 
@@ -44,11 +63,11 @@ void three_spheres() { //TODO Fix it so it looks the same as original
 	cam.defocus_angle = 0.0;
 	cam.focus_dist = 1.0;
 
-	// Render
-	cam.render(world);
+	
+	return scene(cam, world);
 }
 
-void many_spheres(bool bouncing) {
+scene many_spheres(bool bouncing) {
 	// World
 	hittable_list world;
 
@@ -114,12 +133,11 @@ void many_spheres(bool bouncing) {
 
 	cam.defocus_angle = 0.6;
 	cam.focus_dist = 10.0;
-
-	// Render
-	cam.render(world);
+	
+	return scene(cam, world);
 }
 
-void checkered_spheres() {
+scene checkered_spheres() {
 	// World
 	hittable_list world;
 
@@ -140,12 +158,11 @@ void checkered_spheres() {
 	cam.vup = vec3(0, 1, 0);
 
 	cam.defocus_angle = 0.0;
-
-	// Render
-	cam.render(world);
+	
+	return scene(cam, world);
 }
 
-void earth() {
+scene earth() {
 	// World
 	shared_ptr<image_texture> earth_texture = make_shared<image_texture>("earthmap.jpg");
 	shared_ptr<lambertian> earth_surface = make_shared<lambertian>(earth_texture);
@@ -165,11 +182,10 @@ void earth() {
 
 	cam.defocus_angle = 0.0;
 
-	// Render
-	cam.render(hittable_list(globe));
+	return scene(cam, hittable_list(globe));
 }
 
-void perlin_spheres() {
+scene perlin_spheres() {
 	// World
 	hittable_list world;
 
@@ -192,11 +208,10 @@ void perlin_spheres() {
 
 	cam.defocus_angle = 0.0;
 
-	// Render
-	cam.render(world);
+	return scene(cam, world);
 }
 
-void quads() {
+scene quads() {
 	// World
 	hittable_list world;
 
@@ -228,11 +243,11 @@ void quads() {
 
 	cam.defocus_angle = 0.0;
 
-	// Render
-	cam.render(world);
+	
+	return scene(cam, world);
 }
 
-void quads2() {
+scene quads2() {
 	// World
 	hittable_list world;
 
@@ -266,12 +281,11 @@ void quads2() {
 
 	cam.defocus_angle = 0.0;
 
-	// Render
-	cam.render(world);
+	return scene(cam, world);
 }
 
 
-void mandelbrot() {
+scene mandelbrot() {
 	// World
 	hittable_list world;
 
@@ -292,11 +306,10 @@ void mandelbrot() {
 
 	cam.defocus_angle = 0.0;
 
-	// Render
-	cam.render(world);
+	return scene(cam, world);
 }
 
-void simple_light() {
+scene simple_light() {
 	hittable_list world;
 
 	shared_ptr<noise_texture> pertex = make_shared<noise_texture>(4);
@@ -323,10 +336,10 @@ void simple_light() {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	return scene(cam, world);
 }
 
-void cornell_box() {
+scene cornell_box() {
 	hittable_list world;
 
 	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
@@ -357,11 +370,10 @@ void cornell_box() {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	return scene(cam, world);
 }
 
-
-void cornell_box2() {
+scene cornell_box2() {
 	hittable_list world;
 
 	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
@@ -385,8 +397,8 @@ void cornell_box2() {
 
 	cam.aspect_ratio = 1.0;
 	cam.image_width = 600;
-	cam.samples_per_pixel = 100000;
-	cam.max_depth = 1000;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
 	cam.background_bottom = colour(0, 0, 0);
 	cam.background_top = colour(0, 0, 0);
 
@@ -397,6 +409,96 @@ void cornell_box2() {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	return scene(cam, world);
+}
+
+scene cornell_box3() {
+	hittable_list world;
+
+	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(15, 15, 15));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
+	shared_ptr<hittable> box1 = make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), glass);
+	box1 = make_shared<rotate_y>(box1, 15);
+	box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+	world.add(box1);
+
+	shared_ptr<lambertian> blue = make_shared<lambertian>(colour(0.12, 0.45, 0.85));
+	shared_ptr<hittable> box2 = make_shared<box>(point3(0, 0, 0), point3(165, 165, 165), blue);
+	box2 = make_shared<rotate_y>(box2, -18);
+	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+	world.add(box2);
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, world);
+}
+
+scene cornell_smoke() {
+	hittable_list world;
+
+	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<hittable> box1 = make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), white);
+	box1 = make_shared<rotate_y>(box1, 15);
+	box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+
+	shared_ptr<hittable> box2 = make_shared<box>(point3(0, 0, 0), point3(165, 165, 165), white);
+	box2 = make_shared<rotate_y>(box2, -18);
+	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+	world.add(make_shared<constant_medium>(box1, 0.01, colour(0, 0, 0)));
+	world.add(make_shared<constant_medium>(box2, 0.01, colour(1, 1, 1)));
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, world);
 }
 #endif
