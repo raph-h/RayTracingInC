@@ -428,13 +428,13 @@ scene cornell_box3() {
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
 	shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
-	shared_ptr<hittable> box1 = make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), glass);
+	shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), glass);
 	box1 = make_shared<rotate_y>(box1, 15);
 	box1 = make_shared<translate>(box1, vec3(265, 0, 295));
 	world.add(box1);
 
 	shared_ptr<lambertian> blue = make_shared<lambertian>(colour(0.12, 0.45, 0.85));
-	shared_ptr<hittable> box2 = make_shared<box>(point3(0, 0, 0), point3(165, 165, 165), blue);
+	shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), blue);
 	box2 = make_shared<rotate_y>(box2, -18);
 	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
 	world.add(box2);
@@ -473,11 +473,11 @@ scene cornell_smoke() {
 	world.add(make_shared<quad>(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-	shared_ptr<hittable> box1 = make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), white);
+	shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
 	box1 = make_shared<rotate_y>(box1, 15);
 	box1 = make_shared<translate>(box1, vec3(265, 0, 295));
 
-	shared_ptr<hittable> box2 = make_shared<box>(point3(0, 0, 0), point3(165, 165, 165), white);
+	shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
 	box2 = make_shared<rotate_y>(box2, -18);
 	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
 	world.add(make_shared<constant_medium>(box1, 0.01, colour(0, 0, 0)));
@@ -500,5 +500,137 @@ scene cornell_smoke() {
 	cam.defocus_angle = 0;
 
 	return scene(cam, world);
+}
+
+scene final_scene() {
+	hittable_list boxes1;
+	shared_ptr<lambertian> ground = make_shared<lambertian>(colour(0.48, 0.83, 0.53));
+
+	const int boxes_per_side = 20;
+	for (int i = 0; i < boxes_per_side; i++) {
+		for (int j = 0; j < boxes_per_side; j++) {
+			const double w = 100.0;
+			const double x0 = -1000.0 + i * w;
+			const double z0 = -1000.0 + j * w;
+			const double y0 = 0.0;
+			const double x1 = x0 + w;
+			const double y1 = random_double(1, 101);
+			const double z1 = z0 + w;
+			boxes1.add(box(vec3(x0, y0, z0), vec3(x1, y1, z1), ground));
+		}
+	}
+
+	hittable_list world;
+	world.add(make_shared<bvh_node>(boxes1));
+
+	shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
+	world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 300), light));
+
+	point3 center1 = point3(400, 400, 200);
+	point3 center2 = center1 + vec3(30, 0, 0);
+	shared_ptr<lambertian> sphere_material = make_shared<lambertian>(colour(0.7, 0.3, 0.1));
+	world.add(make_shared<sphere>(center1, center2, 50, sphere_material));
+
+	world.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
+	world.add(make_shared<sphere>(point3(0, 150, 145), 50, make_shared<metal>(colour(0.8, 0.8, 0.9), 1.0)));
+
+	shared_ptr<sphere> boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
+	world.add(boundary);
+	world.add(make_shared<constant_medium>(boundary, 0.2, colour(0.2, 0.4, 0.9)));
+	boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
+	world.add(make_shared<constant_medium>(boundary, 0.0001, colour(1, 1, 1)));
+
+	shared_ptr<lambertian> emat = make_shared<lambertian>(make_shared<image_texture>("earthmap.jpg"));
+	world.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
+	shared_ptr<noise_texture> pertext = make_shared<noise_texture>(0.2);
+	world.add(make_shared<sphere>(point3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
+
+	hittable_list boxes2;
+	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	int ns = 1000;
+	for (int j = 0; j < ns; j++) {
+		boxes2.add(make_shared<sphere>(point3::random(0, 165), 10, white));
+	}
+
+	world.add(make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2), 15), vec3(-100, 270, 395)));
+
+	camera cam;
+	
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 800;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 50;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(478, 278, -600);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, world);
+}
+
+scene glass_boxes() {
+	hittable_list world;
+
+	const shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	const shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	const shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	const shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
+	const shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(floor_light);
+
+	constexpr int cube_depth = 5;
+	constexpr double box_size = 50;
+	constexpr double box_spacing = 50;
+	constexpr double box_offset = 45;
+
+	for (int z = 0; z < cube_depth; z++) {
+		for (int y = 0; y < cube_depth; y++) {
+			for (int x = 0; x < cube_depth; x++) {
+				// Figure out a location and orientation
+				const vec3 loc(
+					box_offset + ((box_size + box_spacing) * x),
+					box_offset + ((box_size + box_spacing) * y),
+					-42.5 + ((box_size + box_spacing) * z)
+				);
+				const double rot = (23 * x) + (13 * y) + (3 * z);
+
+				// Add it in
+				shared_ptr<hittable> box1 = box(vec3(0, 0, 0), vec3(box_size, box_size, box_size), glass);
+				box1 = make_shared<rotate_y>(box1, rot);
+				box1 = make_shared<translate>(box1, loc);
+				world.add(box1);
+			}
+		}
+	}
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
+	cam.background_bottom = colour(0, 0, 0);
+	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, hittable_list(make_shared<bvh_node>(world)));
 }
 #endif

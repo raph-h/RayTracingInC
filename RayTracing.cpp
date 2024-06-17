@@ -54,6 +54,12 @@ int main(int argc, char *argv[])
 		case 13:
 			scene = SCENE_H::cornell_smoke();
 			break;
+		case 14:
+			scene = SCENE_H::final_scene();
+			break;
+		case 15:
+			scene = SCENE_H::glass_boxes();
+			break;
 		default:
 			scene = SCENE_H::three_spheres();
 			break;
