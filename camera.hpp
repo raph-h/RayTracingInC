@@ -3,7 +3,7 @@
 
 #include "RayTracing.hpp"
 
-#include "hittable.hpp"
+#include "objects/hittable.hpp"
 #include "material.hpp"
 
 class camera {

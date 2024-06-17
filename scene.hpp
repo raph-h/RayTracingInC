@@ -3,15 +3,15 @@
 
 #include "RayTracing.hpp"
 
-#include "bvh.hpp"
+#include "objects/bvh.hpp"
 #include "camera.hpp"
-#include "constant_medium.hpp"
-#include "hittable.hpp"
-#include "hittable_list.hpp"
+#include "objects/constant_medium.hpp"
+#include "objects/hittable.hpp"
+#include "objects/hittable_list.hpp"
 #include "material.hpp"
-#include "quad.hpp"
-#include "sphere.hpp"
-#include "box.hpp"
+#include "objects/quad.hpp"
+#include "objects/sphere.hpp"
+#include "objects/box.hpp"
 #include "texture.hpp"
 
 class scene {

@@ -1,11 +1,11 @@
 #ifndef CONSTANT_MEDIUM_H
 #define CONSTANT_MEDIUM_H
 
-#include "RayTracing.hpp"
+#include "../RayTracing.hpp"
 
 #include "hittable.hpp"
-#include "material.hpp"
-#include "texture.hpp"
+#include "../material.hpp"
+#include "../texture.hpp"
 
 // Assumes the boundary shape is convex, so this implementation will work for boxes, spheres etc
 // WARNING: This will not work with toruses or shapes that contain voids
