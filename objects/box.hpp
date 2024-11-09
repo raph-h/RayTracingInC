@@ -50,8 +50,8 @@ inline shared_ptr<bvh_node> box(const point3& a, const point3& b, shared_ptr<mat
 	hittable_list sides;
 
 	// Construct the two opposite vertices with the minimum and maximum coordinates.
-	auto min = point3(fmin(a.x(), b.x()), fmin(a.y(), b.y()), fmin(a.z(), b.z()));
-	auto max = point3(fmax(a.x(), b.x()), fmax(a.y(), b.y()), fmax(a.z(), b.z()));
+	auto min = point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
+	auto max = point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
 
 	auto dx = vec3(max.x() - min.x(), 0, 0);
 	auto dy = vec3(0, max.y() - min.y(), 0);

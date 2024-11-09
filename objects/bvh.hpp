@@ -1,7 +1,6 @@
 #ifndef BVH_H
 #define BVH_H
 
-#include "RayTracing.hpp"
 #include "aabb.hpp"
 #include "hittable.hpp"
 #include "hittable_list.hpp"
@@ -35,7 +34,7 @@ public:
 			right = objects[start + 1];
 		}
 		else {
-			std::sort(objects.begin() + start, objects.begin() + end, comparator);
+			std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
 
 			size_t mid = start + object_span / 2;
 			left = make_shared<bvh_node>(objects, start, mid);

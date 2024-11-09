@@ -12,10 +12,8 @@
 
 // C++ STD usings
 
-using std::fabs;
 using std::make_shared;
 using std::shared_ptr;
-using std::sqrt;
 
 // Constants
 
@@ -30,7 +28,7 @@ inline double degrees_to_radians(double degrees) {
 
 inline double random_double() {
 	// Returns a random real in [0, 1)
-	return rand() / (RAND_MAX + 1.0);
+	return std::rand() / (RAND_MAX + 1.0);
 }
 
 inline double random_double(double min, double max) {

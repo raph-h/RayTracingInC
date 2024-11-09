@@ -32,5 +32,27 @@ Files should be .hpp as .h is more for C while .hpp is for C++
 BVH really improved render speeds, I achieved a 10 times faster render
 And with improvements to the bounding box axis determination, about a 11.8 times faster render
 
+Volumes - Uses differential equations
+
+Monte Carlo - Good for applications where great accuracy is not needed
+- Gives a statistical estimate of an answer, getting more and more accurate the longer it is run
+- At a certain point, we can decide that the answer is accurate enough and stop it
+Las Vegas - Will always eventually arrive at an exact answer, but cannot say beforehand how long
+
+Law of diminishing returns - Worst part of Monte Carlo
+- Mititaged by stratifying samples (jittering), by taking a grid and taking a sample within each cell
+- Stratified methods converge at a better asymptotic rate, however the advantage decreases with the dimension of the problem (Curse of Dimensionality)
+	- As ray tracing is a very high-dimension algorithm (Each reflection adds two new dimensions), the output reflection angle won't be stratified (Too complex)
+	- However, the locations of the samples around each pixel can be sampled
+
+Stratification
+- Sharper contrast at locations which have a high frequency of change - Also thought as high information density
+- High information density locations include edges
+- Always stratify when doing a single-reflection or shadowing or strictly 2D problems
+
 Potential improvements
-Triangles, Parallelist, Shadow rays
+Triangles - done, however polygons should be imported to test, Parallelist, Shadow rays
+
+Potential additions
+
+Bidirectional method, metropolis methods, photon mapping

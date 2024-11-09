@@ -1,8 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "RayTracing.hpp"
-
 #include "objects/bvh.hpp"
 #include "camera.hpp"
 #include "objects/constant_medium.hpp"

@@ -1,7 +1,6 @@
 #ifndef QUAD_H
 #define QUAD_H
 
-#include "RayTracing.hpp"
 #include "hittable.hpp"
 
 class quad : public hittable {
@@ -30,7 +29,7 @@ public:
 		double denom = dot(normal, r.direction());
 
 		// No hit if the ray is parallel to the plane
-		if (fabs(denom) < 1e-8)
+		if (std::fabs(denom) < 1e-8)
 			return false;
 
 		// Return false if the hit point parameter t is outside the ray interval

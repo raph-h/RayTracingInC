@@ -1,7 +1,6 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
-#include "RayTracing.hpp"
 #include "aabb.hpp"
 #include "hittable.hpp"
 

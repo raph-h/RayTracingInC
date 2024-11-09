@@ -1,7 +1,6 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "RayTracing.hpp"
 #include "aabb.hpp"
 
 class material;
@@ -65,8 +64,8 @@ class rotate_y : public hittable {
 public:
 	rotate_y(shared_ptr<hittable> object, double angle) : object(object) {
 		double radians = degrees_to_radians(angle);
-		sin_theta = sin(radians);
-		cos_theta = cos(radians);
+		sin_theta = std::sin(radians);
+		cos_theta = std::cos(radians);
 		bbox = object->bounding_box();
 
 		point3 min(infinity, infinity, infinity);

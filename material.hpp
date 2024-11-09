@@ -1,10 +1,8 @@
 #ifndef  MATERIAL_H
 #define MATERIAL_H
 
-#include "RayTracing.hpp"
+#include "objects/hittable.hpp"
 #include "texture.hpp"
-
-class hit_record;
 
 class material {
 public:
@@ -95,7 +93,7 @@ public:
 		
 		vec3 unit_direction = unit_vector(r_in.direction());
 		double cos_theta = std::min(dot(-unit_direction, rec.normal), 1.0);
-		double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+		double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
 
 		bool cannot_refract = ri * sin_theta > 1.0;
 		vec3 direction;

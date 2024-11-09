@@ -1,8 +1,6 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "RayTracing.hpp"
-
 #include "perlin.hpp"
 #include "rtw_stb_image.hpp"
 
@@ -32,7 +30,7 @@ public:
 	checker_texture(double scale, shared_ptr<texture> even, shared_ptr<texture> odd) : inv_scale(1.0 / scale), even(even), odd(odd) {}
 
 	checker_texture(double scale, const colour& c1, const colour& c2)
-		: inv_scale(1.0 / scale), even(make_shared<solid_colour>(c1)), odd(make_shared<solid_colour>(c2)) {}
+		: checker_texture(scale, make_shared<solid_colour>(c1), make_shared<solid_colour>(c2)) {}
 
 	colour value(double u, double v, const point3& p) const override {
 		int xInteger = int(std::floor(inv_scale * p.x()));
@@ -74,8 +72,6 @@ private:
 
 class noise_texture : public texture {
 public:
-	noise_texture() : scale(1.0) {}
-
 	noise_texture(double scale) : scale(scale) {}
 
 	colour value(double u, double v, const point3& p) const override {
@@ -86,7 +82,7 @@ public:
 		// return colour(1, 1, 1) * noise.noise_turbulence(p, 7);
 
 		// Marble like
-		return colour(0.5, 0.5, 0.5) * (1 + sin(scale * p.z() + 10 * noise.noise_turbulence(p, 7)));
+		return colour(0.5, 0.5, 0.5) * (1 + std::sin(scale * p.z() + 10 * noise.noise_turbulence(p, 7)));
 	}
 private:
 	perlin noise;

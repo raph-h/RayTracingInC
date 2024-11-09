@@ -1,8 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "RayTracing.hpp"
-
 #include "objects/hittable.hpp"
 #include "material.hpp"
 
@@ -33,9 +31,12 @@ public:
 			for (int i = 0; i < image_width; i++)
 			{
 				colour pixel_colour(0, 0, 0);
-				for (int sample = 0; sample < samples_per_pixel; sample++) {
-					ray r = get_ray(i, j);
-					pixel_colour += ray_colour(r, max_depth, world);
+				// Stratified to improve render quality
+				for (int s_j = 0; s_j < sqrt_spp; s_j++) {
+					for (int s_i = 0; s_i < sqrt_spp; s_i++) {
+						ray r = get_ray(i, j, s_i, s_j);
+						pixel_colour += ray_colour(r, max_depth, world);
+					}
 				}
 				write_colour(std::cout, pixel_samples_scale * pixel_colour);
 			}
@@ -45,6 +46,9 @@ public:
 private:
 	int image_height; // Rendered image height
 	double pixel_samples_scale; // Colour scale factor for a sum of pixel samples
+	int sqrt_spp; // Square root of number of samples per pixel
+	double reciprocal_sqrt_spp; // 1 / sqrt_spp
+	
 	point3 center; // Camera center
 	vec3 pixel_delta_u; // Offset to pixel to the right
 	vec3 pixel_delta_v; // Offset to pixel below
@@ -58,12 +62,14 @@ private:
 		image_height = int(image_width / aspect_ratio);
 		image_height = (image_height < 1) ? 1 : image_height;
 
-		pixel_samples_scale = 1.0 / samples_per_pixel;
+		sqrt_spp = int(std::sqrt(samples_per_pixel));
+		reciprocal_sqrt_spp = 1.0 / sqrt_spp;
+		pixel_samples_scale = 1.0 / (sqrt_spp * sqrt_spp);
 
 		center = lookfrom;
 
 		// Determine viewport dimensions
-		double h = tan(degrees_to_radians(vfov) / 2);
+		double h = std::tan(degrees_to_radians(vfov) / 2);
 		double viewport_height = 2 * h * focus_dist; // Viewport widths less than one are ok since they are real valued
 		double viewport_width = viewport_height * (double(image_width) / image_height);
 
@@ -85,20 +91,27 @@ private:
 		pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 	
 		// Calculate the camera defocus disk basis vectors
-		double defocus_radius = focus_dist * tan(degrees_to_radians(defocus_angle / 2));
+		double defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
 		defocus_disk_u = u * defocus_radius;
 		defocus_disk_v = v * defocus_radius;
 	}
 
-	ray get_ray(int i, int j) const {
-		// Construct a camera ray originating from the defocus disk and directed at randomly sampled points around the pixel location i, j
-		vec3 offset = sample_square(); //TODO: Can also use sample_disk(0.5);
+	ray get_ray(int i, int j, int s_i, int s_j) const {
+		// Construct a camera ray originating from the defocus disk and directed at randomly sampled points around the pixel location i, j for stratified sample square s_i, s_j
+		vec3 offset = sample_square_stratified(s_i, s_j); //TODO: Can also use sample_disk(0.5);, or sample_square();
 		vec3 pixel_sample = pixel00_loc + ((i + offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);
 		vec3 ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
 		vec3 ray_direction = pixel_sample - ray_origin;
 		double ray_time = random_double();
 
 		return ray(ray_origin, ray_direction, ray_time);
+	}
+
+	vec3 sample_square_stratified(int s_i, int s_j) const {
+		// Returns the vector to a random point in the square sub-pixel specified by grid indices s_i and s_j, for an idealized unit square pixel [-0.5, -0.5] to [0.5, 0.5]
+		double px = ((s_i + random_double()) * reciprocal_sqrt_spp) - 0.5;
+		double py = ((s_j + random_double()) * reciprocal_sqrt_spp) - 0.5;
+		return vec3(px, py, 0);
 	}
 
 	vec3 sample_square() const {

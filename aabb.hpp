@@ -1,8 +1,6 @@
 #ifndef AABB_H
 #define AABB_H
 
-#include "RayTracing.hpp"
-
 class aabb {
 public:
 	interval x, y, z;
