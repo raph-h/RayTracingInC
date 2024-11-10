@@ -13,7 +13,7 @@ public:
 		perlin_generate_perm(perm_z);
 	}
 
-	double noise(const point3& p) const {	
+	double noise(const vec3& p) const {	
 		double u = p.x() - std::floor(p.x());
 		double v = p.y() - std::floor(p.y());
 		double w = p.z() - std::floor(p.z());
@@ -33,9 +33,9 @@ public:
 	}
 
 	// To create a composite noise with multiple summed frequencies
-	double noise_turbulence(const point3& p, int depth) const {
+	double noise_turbulence(const vec3& p, int depth) const {
 		double accum = 0.0;
-		point3 temp_p = p;
+		vec3 temp_p = p;
 		double weight = 1.0;
 
 		for (int i = 0; i < depth; i++) {

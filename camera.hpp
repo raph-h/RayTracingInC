@@ -14,8 +14,8 @@ public:
 	colour background_top = colour(0.5, 0.7, 1.0); // Scene background colour on the top
 
 	double vfov = 90; // Verticla view angle (field of view)
-	point3 lookfrom = point3(0, 0, 0); // Point camera is looking from
-	point3 lookat = point3(0, 0, -1); // Point camera is looking at
+	vec3 lookfrom = vec3(0, 0, 0); // Point camera is looking from
+	vec3 lookat = vec3(0, 0, -1); // Point camera is looking at
 	vec3 vup = vec3(0, 1, 0); // Camera-relative "up" direction
 
 	double defocus_angle = 0; // Variation angle of rays through each pixel
@@ -49,10 +49,10 @@ private:
 	int sqrt_spp; // Square root of number of samples per pixel
 	double reciprocal_sqrt_spp; // 1 / sqrt_spp
 	
-	point3 center; // Camera center
+	vec3 center; // Camera center
 	vec3 pixel_delta_u; // Offset to pixel to the right
 	vec3 pixel_delta_v; // Offset to pixel below
-	point3 pixel00_loc; // Location of pixel 0, 0
+	vec3 pixel00_loc; // Location of pixel 0, 0
 	vec3 u, v, w; // Camera frame basis vectors
 	vec3 defocus_disk_u; // Defocus disk horizontal radius
 	vec3 defocus_disk_v; // Defocus disk vertial radius
@@ -124,7 +124,7 @@ private:
 		return radius * random_in_unit_disk();
 	}
 
-	point3 defocus_disk_sample() const {
+	vec3 defocus_disk_sample() const {
 		// Returns a random point in the camera defocus disk
 		vec3 p = random_in_unit_disk();
 		return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);

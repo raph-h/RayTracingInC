@@ -6,20 +6,20 @@
 class box : public hittable {
 public:
 	box(const vec3& a, const vec3& b, shared_ptr<material> mat) : mat(mat) {
-		point3 min = point3(std::min(a.x(), b.x()), std::min(a.y(), b.y()), std::min(a.z(), b.z()));
-		point3 max = point3(std::max(a.x(), b.x()), std::max(a.y(), b.y()), std::max(a.z(), b.z()));
+		vec3 min = vec3(std::min(a.x(), b.x()), std::min(a.y(), b.y()), std::min(a.z(), b.z()));
+		vec3 max = vec3(std::max(a.x(), b.x()), std::max(a.y(), b.y()), std::max(a.z(), b.z()));
 
 		vec3 dx = vec3(max.x() - min.x(), 0, 0);
 		vec3 dy = vec3(0, max.y() - min.y(), 0);
 		vec3 dz = vec3(0, 0, max.z() - min.z());
 
 		
-		sides.add(make_shared<quad>(point3(min.x(), min.y(), max.z()),  dx,  dy, mat)); // front
-		sides.add(make_shared<quad>(point3(max.x(), min.y(), max.z()), -dz,  dy, mat)); // right
-		sides.add(make_shared<quad>(point3(max.x(), min.y(), min.z()), -dx,  dy, mat)); // back
-		sides.add(make_shared<quad>(point3(min.x(), min.y(), min.z()),  dz,  dy, mat)); // left
-		sides.add(make_shared<quad>(point3(min.x(), max.y(), max.z()),  dx, -dz, mat)); // top
-		sides.add(make_shared<quad>(point3(min.x(), min.y(), min.z()),  dx,  dz, mat)); // bottom
+		sides.add(make_shared<quad>(vec3(min.x(), min.y(), max.z()),  dx,  dy, mat)); // front
+		sides.add(make_shared<quad>(vec3(max.x(), min.y(), max.z()), -dz,  dy, mat)); // right
+		sides.add(make_shared<quad>(vec3(max.x(), min.y(), min.z()), -dx,  dy, mat)); // back
+		sides.add(make_shared<quad>(vec3(min.x(), min.y(), min.z()),  dz,  dy, mat)); // left
+		sides.add(make_shared<quad>(vec3(min.x(), max.y(), max.z()),  dx, -dz, mat)); // top
+		sides.add(make_shared<quad>(vec3(min.x(), min.y(), min.z()),  dx,  dz, mat)); // bottom
 		hierarchy = make_shared<bvh_node>(sides);
 
 		bbox = aabb(box_min, box_max);
@@ -43,26 +43,26 @@ private:
 };
 */
 
-inline shared_ptr<bvh_node> box(const point3& a, const point3& b, shared_ptr<material> mat)
+inline shared_ptr<bvh_node> box(const vec3& a, const vec3& b, shared_ptr<material> mat)
 {
 	// Returns the 3D box (six sides) that contains the two opposite vertices a & b.
 
 	hittable_list sides;
 
 	// Construct the two opposite vertices with the minimum and maximum coordinates.
-	auto min = point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
-	auto max = point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
+	auto min = vec3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
+	auto max = vec3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
 
 	auto dx = vec3(max.x() - min.x(), 0, 0);
 	auto dy = vec3(0, max.y() - min.y(), 0);
 	auto dz = vec3(0, 0, max.z() - min.z());
 
-	sides.add(make_shared<quad>(point3(min.x(), min.y(), max.z()), dx, dy, mat)); // front
-	sides.add(make_shared<quad>(point3(max.x(), min.y(), max.z()), -dz, dy, mat)); // right
-	sides.add(make_shared<quad>(point3(max.x(), min.y(), min.z()), -dx, dy, mat)); // back
-	sides.add(make_shared<quad>(point3(min.x(), min.y(), min.z()), dz, dy, mat)); // left
-	sides.add(make_shared<quad>(point3(min.x(), max.y(), max.z()), dx, -dz, mat)); // top
-	sides.add(make_shared<quad>(point3(min.x(), min.y(), min.z()), dx, dz, mat)); // bottom
+	sides.add(make_shared<quad>(vec3(max.x(), min.y(), max.z()), -dz, dy, mat)); // right
+	sides.add(make_shared<quad>(vec3(max.x(), min.y(), min.z()), -dx, dy, mat)); // back
+	sides.add(make_shared<quad>(vec3(min.x(), min.y(), max.z()), dx, dy, mat)); // front
+	sides.add(make_shared<quad>(vec3(min.x(), min.y(), min.z()), dz, dy, mat)); // left
+	sides.add(make_shared<quad>(vec3(min.x(), max.y(), max.z()), dx, -dz, mat)); // top
+	sides.add(make_shared<quad>(vec3(min.x(), min.y(), min.z()), dx, dz, mat)); // bottom
 
 	return make_shared<bvh_node>(sides);
 }
