@@ -8,7 +8,7 @@ class texture {
 public:
 	virtual ~texture() = default;
 
-	virtual colour value(double u, double v, const vec3& p) const = 0;
+	virtual colour value(double u, double v, const point3& p) const = 0;
 };
 
 class solid_colour : public texture {
@@ -17,7 +17,7 @@ public:
 
 	solid_colour(double red, double green, double blue) : solid_colour(colour(red, green, blue)) {}
 
-	colour value(double u, double v, const vec3& p) const override {
+	colour value(double u, double v, const point3& p) const override {
 		return albedo;
 	}
 
@@ -32,7 +32,7 @@ public:
 	checker_texture(double scale, const colour& c1, const colour& c2)
 		: checker_texture(scale, make_shared<solid_colour>(c1), make_shared<solid_colour>(c2)) {}
 
-	colour value(double u, double v, const vec3& p) const override {
+	colour value(double u, double v, const point3& p) const override {
 		int xInteger = int(std::floor(inv_scale * p.x()));
 		int yInteger = int(std::floor(inv_scale * p.y()));
 		int zInteger = int(std::floor(inv_scale * p.z()));
@@ -51,7 +51,7 @@ class image_texture : public texture {
 public:
 	image_texture(const char* filename) : image(filename) {}
 
-	colour value(double u, double v, const vec3& p) const override {
+	colour value(double u, double v, const point3& p) const override {
 		// If we have no texture data, then return solid cyan as a debugging aid
 		if (image.height() <= 0) return colour(0, 1, 1);
 
@@ -74,7 +74,7 @@ class noise_texture : public texture {
 public:
 	noise_texture(double scale) : scale(scale) {}
 
-	colour value(double u, double v, const vec3& p) const override {
+	colour value(double u, double v, const point3& p) const override {
 		// Perlin interpolate can return negative values [-1, +1], so we must map to [0, 1]
 		// return colour(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
 		
@@ -95,7 +95,7 @@ public:
 	mandelbrot_texture() : max_limit(1000) {}
 	mandelbrot_texture(int max_limit) : max_limit(max_limit) {}
 
-	colour value(double u, double v, const vec3& p) const override {
+	colour value(double u, double v, const point3& p) const override {
 		// Mandelbrot set equation
 		double x = (u * 4 - 2);
 		double y = (v * 4 - 2);

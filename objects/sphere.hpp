@@ -6,24 +6,26 @@
 class sphere : public hittable {
 public:
 	// Stationary Sphere
-	sphere(const vec3& static_center, double radius, shared_ptr<material> mat)
-		: center(static_center, vec3(0, 0, 0)), radius(std::max(0.0, radius)), mat(mat) {
+	sphere(const point3& center, double radius, shared_ptr<material> mat)
+		: start_center(center), radius(std::max(0.0, radius)), mat(mat), is_moving(false) {
 		vec3 rvec = vec3(radius, radius, radius);
-		bbox = aabb(static_center - rvec, static_center + rvec);
+		bbox = aabb(start_center - rvec, start_center + rvec);
 	}
 	
 	// Moving Sphere
-	sphere(const vec3& start_center, const vec3& end_center, double radius, shared_ptr<material> mat)
-		: center(start_center, end_center - start_center), radius(std::max(0.0, radius)), mat(mat) {
+	sphere(const point3& start_center, const point3& end_center, double radius, shared_ptr<material> mat)
+		: start_center(start_center), radius(std::max(0.0, radius)), mat(mat), is_moving(true) {
+		center_vec = end_center - start_center;
+
 		vec3 rvec = vec3(radius, radius, radius);
-		aabb box1(center.at(0) - rvec, center.at(0) + rvec);
-		aabb box2(center.at(1) - rvec, center.at(1) + rvec);
+		aabb box1(start_center - rvec, start_center + rvec);
+		aabb box2(end_center - rvec, end_center + rvec);
 		bbox = aabb(box1, box2);
 	}
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-		vec3 current_center = center.at(r.time());
-		vec3 oc = current_center - r.origin();
+		point3 center = is_moving ? sphere_center(r.time()) : start_center;
+		vec3 oc = center - r.origin();
 		// Mathematically vec3.length_squared() is the same as dot of a vec3 with itself
 		double a = r.direction().length_squared();
 		double h = dot(r.direction(), oc); // The -2.0 will simplify itself out
@@ -44,7 +46,7 @@ public:
 
 		rec.t = root;
 		rec.p = r.at(root);
-		vec3 outward_normal = (rec.p - current_center) / radius;
+		vec3 outward_normal = (rec.p - center) / radius;
 		rec.set_face_normal(r, outward_normal);
 		get_sphere_uv(outward_normal, rec.u, rec.v); // Set's the u and v values of rec
 		rec.mat_ptr = mat.get();
@@ -56,13 +58,21 @@ public:
 		return bbox;
 	}
 private:
-	ray center;
+	point3 start_center;
 	double radius;
 	shared_ptr<material> mat;
 
+	bool is_moving;
+	vec3 center_vec;
+
 	aabb bbox; // Bounding box
 
-	static void get_sphere_uv(const vec3& p, double& u, double& v) {
+	point3 sphere_center(double time) const {
+		// Linearly interpolate from start_center to end_center according to time, where t=0 yields start_center and t=1 yields end_center
+		return start_center + time * center_vec;
+	}
+
+	static void get_sphere_uv(const point3& p, double& u, double& v) {
 		// p: a given point on the sphere of radius one, centered at the origin
 		// u: returned value [0, 1] of angle around the Y axis from X = -1
 		// v: returned value [0, 1] of angle from Y = -1 to Y = +1

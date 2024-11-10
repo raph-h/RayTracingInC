@@ -7,7 +7,7 @@ class material;
 
 class hit_record {
 public:
-	vec3 p;
+	point3 p;
 	vec3 normal;
 	//shared_ptr<material> mat;
 	material* mat_ptr; // IMPROVED: By using a normal pointer, we improve performance
@@ -42,7 +42,7 @@ public:
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 		// Move the ray backwards by the offset
 		ray offset_r(r.origin() - offset, r.direction(), r.time());
-
+		
 		// Determine whether an intersection exists along the offset ray (and if so, where)
 		if (!object->hit(offset_r, ray_t, rec))
 			return false;
@@ -68,8 +68,8 @@ public:
 		cos_theta = std::cos(radians);
 		bbox = object->bounding_box();
 
-		vec3 min(infinity, infinity, infinity);
-		vec3 max(-infinity, -infinity, -infinity);
+		point3 min(infinity, infinity, infinity);
+		point3 max(-infinity, -infinity, -infinity);
 
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -77,7 +77,7 @@ public:
 					double x = i * bbox.x.max + (1 - i) * bbox.x.min;
 					double y = j * bbox.y.max + (1 - j) * bbox.y.min;
 					double z = k * bbox.z.max + (1 - k) * bbox.z.min;
-
+				
 					double newx = cos_theta * x + sin_theta * z;
 					double newz = -sin_theta * x + cos_theta * z;
 
@@ -92,11 +92,17 @@ public:
 		}
 		bbox = aabb(min, max);
 	}
-
+	
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-		// Transform the ray from world space to object space
-		vec3 origin = vec3((cos_theta * r.origin().x()) - (sin_theta * r.origin().z()), r.origin().y(), (sin_theta * r.origin().x()) + (cos_theta * r.origin().z()));
-		vec3 direction = vec3((cos_theta * r.direction().x()) - (sin_theta * r.direction().z()), r.direction().y(), (sin_theta * r.direction().x()) + (cos_theta * r.direction().z()));
+		// Change the ray from world space to object space
+		vec3 origin = r.origin();
+		vec3 direction = r.direction();
+
+		origin[0] = cos_theta * r.origin()[0] - sin_theta * r.origin()[2];
+		origin[2] = sin_theta * r.origin()[0] + cos_theta * r.origin()[2];
+
+		direction[0] = cos_theta * r.direction()[0] - sin_theta * r.direction()[2];
+		direction[2] = sin_theta * r.direction()[0] + cos_theta * r.direction()[2];
 
 		ray rotated_r(origin, direction, r.time());
 
@@ -104,11 +110,18 @@ public:
 		if (!object->hit(rotated_r, ray_t, rec))
 			return false;
 
-		// Transform the intersection point from object space to world space
-		rec.p = vec3((cos_theta * rec.p.x()) + (sin_theta * rec.p.z()), rec.p.y(), (-sin_theta * rec.p.x()) + (cos_theta * rec.p.z()));
+		// Change the intersection point from object space to world space
+		vec3 p = rec.p;
+		p[0] = cos_theta * rec.p[0] + sin_theta * rec.p[2];
+		p[2] = -sin_theta * rec.p[0] + cos_theta * rec.p[2];
 
-		// Transform the normal from object space to world space
-		rec.normal = vec3((cos_theta * rec.normal.x()) + (sin_theta * rec.normal.z()), rec.normal.y(), (-sin_theta * rec.normal.x()) + (cos_theta * rec.normal.z()));
+		// Change the normal from object space to world space
+		vec3 normal = rec.normal;
+		normal[0] = cos_theta * rec.normal[0] + sin_theta * rec.normal[2];
+		normal[2] = -sin_theta * rec.normal[0] + cos_theta * rec.normal[2];
+
+		rec.p = p;
+		rec.normal = normal;
 
 		return true;
 	}

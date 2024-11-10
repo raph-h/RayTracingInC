@@ -57,7 +57,7 @@ public:
 };
 
 // point3 is just an alias for vec3, but useful for geometric clarity in the code.
-//using point3 = vec3;
+using point3 = vec3;
 
 // Vector Utility Functions
 inline vec3 operator + (const vec3& u, const vec3& v) {
@@ -107,13 +107,16 @@ inline vec3 random_in_unit_disk() {
 	}
 }
 
-inline vec3 random_unit_vector() {
+inline vec3 random_in_unit_sphere() {
 	while (true) {
 		vec3 p = vec3::random(-1, 1);
-		double lensq = p.length_squared();
-		if (1e-160 < lensq && lensq < 1)
-			return p / std::sqrt(lensq);
+		if (p.length_squared() < 1)
+			return p;
 	}
+}
+
+inline vec3 random_unit_vector() {
+	return unit_vector(random_in_unit_sphere());
 }
 
 inline vec3 random_on_hemisphere(const vec3& normal) { // Get a vector which is randomly on the surface of a sphere
