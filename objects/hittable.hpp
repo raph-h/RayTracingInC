@@ -94,34 +94,21 @@ public:
 	}
 	
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-		// Change the ray from world space to object space
-		vec3 origin = r.origin();
-		vec3 direction = r.direction();
-
-		origin[0] = cos_theta * r.origin()[0] - sin_theta * r.origin()[2];
-		origin[2] = sin_theta * r.origin()[0] + cos_theta * r.origin()[2];
-
-		direction[0] = cos_theta * r.direction()[0] - sin_theta * r.direction()[2];
-		direction[2] = sin_theta * r.direction()[0] + cos_theta * r.direction()[2];
-
+		// Transform the ray from world space to object space
+		vec3 origin = vec3((cos_theta * r.origin().x()) - (sin_theta * r.origin().z()), r.origin().y(), (sin_theta * r.origin().x()) + (cos_theta * r.origin().z()));
+		vec3 direction = vec3((cos_theta * r.direction().x()) - (sin_theta * r.direction().z()), r.direction().y(), (sin_theta * r.direction().x()) + (cos_theta * r.direction().z()));
+		
 		ray rotated_r(origin, direction, r.time());
 
 		// Determine whether an intersection exists in object space (and if so, where)
 		if (!object->hit(rotated_r, ray_t, rec))
 			return false;
 
-		// Change the intersection point from object space to world space
-		vec3 p = rec.p;
-		p[0] = cos_theta * rec.p[0] + sin_theta * rec.p[2];
-		p[2] = -sin_theta * rec.p[0] + cos_theta * rec.p[2];
+		// Transform the intersection point from object space to world space
+		rec.p = vec3((cos_theta * rec.p.x()) + (sin_theta * rec.p.z()), rec.p.y(), (-sin_theta * rec.p.x()) + (cos_theta * rec.p.z()));
 
-		// Change the normal from object space to world space
-		vec3 normal = rec.normal;
-		normal[0] = cos_theta * rec.normal[0] + sin_theta * rec.normal[2];
-		normal[2] = -sin_theta * rec.normal[0] + cos_theta * rec.normal[2];
-
-		rec.p = p;
-		rec.normal = normal;
+		// Transform the normal from object space to world space
+		rec.normal = vec3((cos_theta * rec.normal.x()) + (sin_theta * rec.normal.z()), rec.normal.y(), (-sin_theta * rec.normal.x()) + (cos_theta * rec.normal.z()));
 
 		return true;
 	}
