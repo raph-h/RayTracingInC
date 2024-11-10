@@ -42,7 +42,7 @@ public:
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 		// Move the ray backwards by the offset
 		ray offset_r(r.origin() - offset, r.direction(), r.time());
-		
+
 		// Determine whether an intersection exists along the offset ray (and if so, where)
 		if (!object->hit(offset_r, ray_t, rec))
 			return false;
@@ -77,7 +77,7 @@ public:
 					double x = i * bbox.x.max + (1 - i) * bbox.x.min;
 					double y = j * bbox.y.max + (1 - j) * bbox.y.min;
 					double z = k * bbox.z.max + (1 - k) * bbox.z.min;
-				
+
 					double newx = cos_theta * x + sin_theta * z;
 					double newz = -sin_theta * x + cos_theta * z;
 
@@ -92,12 +92,12 @@ public:
 		}
 		bbox = aabb(min, max);
 	}
-	
+
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 		// Transform the ray from world space to object space
 		vec3 origin = vec3((cos_theta * r.origin().x()) - (sin_theta * r.origin().z()), r.origin().y(), (sin_theta * r.origin().x()) + (cos_theta * r.origin().z()));
 		vec3 direction = vec3((cos_theta * r.direction().x()) - (sin_theta * r.direction().z()), r.direction().y(), (sin_theta * r.direction().x()) + (cos_theta * r.direction().z()));
-		
+
 		ray rotated_r(origin, direction, r.time());
 
 		// Determine whether an intersection exists in object space (and if so, where)
