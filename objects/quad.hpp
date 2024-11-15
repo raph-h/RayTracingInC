@@ -55,6 +55,19 @@ public:
 		return true;
 	}
 
+	double pdf_value(const point3& origin, const vec3& direction) const override {
+		hit_record rec;
+		if (!this->hit(ray(origin, direction), interval(0, infinity), rec))
+			return 0;
+		double distance_squared = rec.t * rec.t * direction.length_squared();
+		double cosine = std::fabs(dot(direction, rec.normal) / direction.length());
+		return distance_squared / (cosine * area);
+	}
+
+	vec3 random(const point3& origin) const override {
+		return vec3(1, 0, 0);
+	}
+
 	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const {
 		interval unit_interval = interval(0, 1);
 		// Given the hit point in plane coordinates, return false if it is outside the primitive, otherwise set the hit record UV coordinates and return true
@@ -73,6 +86,7 @@ private:
 	aabb bbox;
 	vec3 normal;
 	double D; //Ax+By+Cz=D, where n = nxv
+	double area;
 };
 
 class triangle : public quad {

@@ -124,6 +124,17 @@ inline vec3 random_on_hemisphere(const vec3& normal) { // Get a vector which is 
 		return -on_unit_sphere;
 }
 
+inline vec3 random_cosine_direction() {
+	double r1 = random_double();
+	double r2 = random_double();
+
+	double phi = 2 * pi * r1;
+	double x = std::cos(phi) * std::sqrt(r2);
+	double y = std::sin(phi) * std::sqrt(r2);
+	double z = std::sqrt(1 - r2);
+	return vec3(x, y, z);
+}
+
 inline vec3 reflect(const vec3& v, const vec3& n) {
 	return v - 2 * dot(v, n) * n; // n is a unit vector
 }

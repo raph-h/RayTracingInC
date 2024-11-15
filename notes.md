@@ -50,6 +50,11 @@ Stratification
 - High information density locations include edges
 - Always stratify when doing a single-reflection or shadowing or strictly 2D problems
 
+PDF for importance sampling
+- A non-uniform PDF steers more samples to where the PDF is big and fewer to where the PDF is small, this can be used to steer samples to areas which have a higher noise, we can reduce the total noise of the scene with fewer samples, speeding things up
+- Choosing a incorrect PDF will not ruin the render, but an incorrect scattering function will ruin a render
+- Most difficult bug in a Monte Carlo program - A bug that produces reasonable outputs
+
 Potential improvements
 Triangles - done, however polygons should be imported to test, Parallelist, Shadow rays
 

@@ -3,6 +3,7 @@
 
 #include "objects/hittable.hpp"
 #include "material.hpp"
+#include "pdf.hpp"
 
 class camera {
 public:
@@ -145,11 +146,18 @@ private:
 
 		ray scattered;
 		colour attenuation;
-		colour emission_colour = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-		if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+		double pdf_value;
+		colour emission_colour = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
+		if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value))
 			return emission_colour;
+
+		cosine_pdf surface_pdf(rec.normal);
+		scattered = ray(rec.p, surface_pdf.generate(), r.time());
+		pdf_value = surface_pdf.value(scattered.direction());
+
+		double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
 		
-		colour scatter_colour = attenuation * ray_colour(scattered, depth - 1, world);
+		colour scatter_colour = (attenuation * scattering_pdf * ray_colour(scattered, depth - 1, world)) / pdf_value;
 
 		return emission_colour + scatter_colour;
 	}

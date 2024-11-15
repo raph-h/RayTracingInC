@@ -50,6 +50,14 @@ public:
 	}
 
 	aabb bounding_box() const override { return boundary->bounding_box(); }
+
+	double pdf_value(const point3& origin, const vec3& direction) const override {
+		return 0.0;
+	}
+
+	vec3 random(const point3& origin) const override {
+		return vec3(1, 0, 0);
+	}
 private:
 	shared_ptr<hittable> boundary;
 	double neg_inv_density;
