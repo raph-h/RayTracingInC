@@ -22,7 +22,7 @@ public:
 	double defocus_angle = 0; // Variation angle of rays through each pixel
 	double focus_dist = 10; // Distance from camera lookfrom point to plane of perfect focus
 
-	void render(const hittable& world) {
+	void render(const hittable& world, const hittable& lights) {
 		initialize();
 
 		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -36,7 +36,7 @@ public:
 				for (int s_j = 0; s_j < sqrt_spp; s_j++) {
 					for (int s_i = 0; s_i < sqrt_spp; s_i++) {
 						ray r = get_ray(i, j, s_i, s_j);
-						pixel_colour += ray_colour(r, max_depth, world);
+						pixel_colour += ray_colour(r, max_depth, world, lights);
 					}
 				}
 				write_colour(std::cout, pixel_samples_scale * pixel_colour);
@@ -131,7 +131,7 @@ private:
 		return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
 	}
 
-	colour ray_colour(const ray& r, int depth, const hittable& world) const {
+	colour ray_colour(const ray& r, int depth, const hittable& world, const hittable& lights) const {
 		// If we've exceeded the ray bounce limit, no more light is gathered
 		if (depth <= 0)
 			return colour(0, 0, 0);
@@ -151,13 +151,14 @@ private:
 		if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value))
 			return emission_colour;
 
-		cosine_pdf surface_pdf(rec.normal);
-		scattered = ray(rec.p, surface_pdf.generate(), r.time());
-		pdf_value = surface_pdf.value(scattered.direction());
+		hittable_pdf light_pdf(lights, rec.p);
+		scattered = ray(rec.p, light_pdf.generate(), r.time());
+		pdf_value = light_pdf.value(scattered.direction());
 
 		double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
 		
-		colour scatter_colour = (attenuation * scattering_pdf * ray_colour(scattered, depth - 1, world)) / pdf_value;
+		colour sample_colour = ray_colour(scattered, depth - 1, world, lights);
+		colour scatter_colour = (attenuation * scattering_pdf * sample_colour) / pdf_value;
 
 		return emission_colour + scatter_colour;
 	}
