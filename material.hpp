@@ -5,6 +5,14 @@
 #include "onb.hpp"
 #include "texture.hpp"
 
+class scatter_record {
+public:
+	colour attenuation;
+	shared_ptr<pdf> pdf_ptr;
+	bool skip_pdf;
+	ray skip_pdf_ray;
+};
+
 class material {
 public:
 	virtual ~material() = default;

@@ -12,6 +12,8 @@ public:
 
 		w = n / dot(n, n);
 
+		area = n.length();
+
 		set_bounding_box();
 	}
 
@@ -65,7 +67,8 @@ public:
 	}
 
 	vec3 random(const point3& origin) const override {
-		return vec3(1, 0, 0);
+		vec3 p = Q + (random_double() * u) + (random_double() * v);
+		return p - origin;
 	}
 
 	virtual bool is_interior(double a, double b, hit_record& rec, point3 intersection) const {
