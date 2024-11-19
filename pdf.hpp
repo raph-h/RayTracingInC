@@ -76,4 +76,6 @@ public:
 private:
 	shared_ptr<pdf> p[2];
 };
+
+//TODO: glass pdf
 #endif

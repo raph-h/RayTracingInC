@@ -57,11 +57,22 @@ public:
 	}
 
 	double pdf_value(const point3& origin, const vec3& direction) const override {
-		return 0.0;
+		// The method only works for stationary spheres
+		// TODO: find a way to have moving spheres?
+		hit_record rec;
+		if (!this->hit(ray(origin, direction), interval(0, infinity), rec))
+			return 0;
+		double distance_squared = (center.at(0) - origin).length_squared();
+		double cos_theta_max = std::sqrt(1 - radius * radius / distance_squared);
+		double solid_angle = 2 * pi * (1 - cos_theta_max);
+		return 1 / solid_angle;
 	}
 
 	vec3 random(const point3& origin) const override {
-		return vec3(1, 0, 0);
+		vec3 direction = center.at(0) - origin;
+		double distance_squared = direction.length_squared();
+		onb uvw(direction);
+		return uvw.transform(random_to_sphere(radius, distance_squared));
 	}
 private:
 	ray center;
@@ -82,6 +93,17 @@ private:
 
 		u = phi / (2 * pi);
 		v = theta / pi;
+	}
+
+	static vec3 random_to_sphere(double radius, double distance_squared) {
+		double r1 = random_double();
+		double r2 = random_double();
+		double z = 1 + r2 * (std::sqrt(1 - radius * radius / distance_squared) - 1);
+
+		double phi = 2 * pi * r1;
+		double x = std::cos(phi) * std::sqrt(1 - z * z);
+		double y = std::sin(phi) * std::sqrt(1 - z * z);
+		return vec3(x, y, z);
 	}
 };
 

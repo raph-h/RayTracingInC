@@ -56,10 +56,14 @@ PDF for importance sampling
 - Most difficult bug in a Monte Carlo program - A bug that produces reasonable outputs
 
 
+
+- NaN never equals itself
+
 Potential improvements
-Triangles - done, however polygons should be imported to test, Parallelist, Shadow rays
+Triangles - done, however polygons should be imported to test, Parallelism, Shadow rays
 
 Potential additions
 
-Bidirectional method, metropolis methods, photon mapping
-Add pdf support for other objects - not just quads (spheres) etc
+Bidirectional method, metropolis methods, photon mapping (RGB spectrum?)
+- Physical based rendering - Bidirectional and path spaced approaches such as Metropolis
+- Convert to a RGB spectrum (each ray having a random wavelength and all RGB as floats)

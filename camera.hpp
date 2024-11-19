@@ -137,6 +137,7 @@ private:
 			return colour(0, 0, 0);
 		
 		hit_record rec;
+		// If the ray hits nothing, return the background colour
 		if (!world.hit(r, interval(0.001, infinity), rec)) {
 			vec3 unit_direction = unit_vector(r.direction());
 			double a = 0.5 * (unit_direction.y() + 1.0);
@@ -144,24 +145,25 @@ private:
 			return (1.0 - a) * background_bottom + a * background_top;
 		}
 
-		ray scattered;
-		colour attenuation;
-		double pdf_value;
+		scatter_record srec;
 		colour emission_colour = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
-		if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_value))
+		if (!rec.mat_ptr->scatter(r, rec, srec)) {
 			return emission_colour;
+		}
 
-		auto p0 = make_shared<hittable_pdf>(lights, rec.p);
-		auto p1 = make_shared<cosine_pdf>(rec.normal);
-		mixture_pdf mixed_pdf(p0, p1);
+		if (srec.skip_pdf) {
+			return srec.attenuation * ray_colour(srec.skip_pdf_ray, depth - 1, world, lights); // TODO: what about emission_colour
+		}
+		shared_ptr<hittable_pdf> light_ptr = make_shared<hittable_pdf>(lights, rec.p);
+		mixture_pdf p(light_ptr, srec.pdf_ptr);
 
-		scattered = ray(rec.p, mixed_pdf.generate(), r.time());
-		pdf_value = mixed_pdf.value(scattered.direction());
+		ray scattered = ray(rec.p, p.generate(), r.time());
+		double pdf_value = p.value(scattered.direction());
 
 		double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
 		
 		colour sample_colour = ray_colour(scattered, depth - 1, world, lights);
-		colour scatter_colour = (attenuation * scattering_pdf * sample_colour) / pdf_value;
+		colour scatter_colour = (srec.attenuation * scattering_pdf * sample_colour) / pdf_value;
 
 		return emission_colour + scatter_colour;
 	}
