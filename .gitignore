@@ -33,3 +33,4 @@
 /.vs
 /build
 /out/build/x64-debug
+/out/build/x64-release
