@@ -14,19 +14,20 @@
 
 class scene {
 public:
-	scene(camera cam, hittable_list world) : cam(cam), world(world) {}
+	scene(camera cam, hittable_list world, hittable_list lights) : cam(cam), world(world), lights(lights) {}
 
 	void render() {
-		cam.render(world);
+		cam.render(world, lights, lights.objects.size() == 0 ? false : true);
 	}
 	void high_res_render(int samples) {
 		cam.samples_per_pixel = samples;
 		cam.max_depth = 500;
-		cam.render(world);
+		cam.render(world, lights, lights.objects.size() == 0 ? false : true);
 	}
 private:
 	camera cam;
 	hittable_list world;
+	hittable_list lights;
 };
 
 scene three_spheres() { //TODO Fix it so it looks the same as original
@@ -62,7 +63,7 @@ scene three_spheres() { //TODO Fix it so it looks the same as original
 	cam.focus_dist = 1.0;
 
 	
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 scene many_spheres(bool bouncing) {
@@ -132,12 +133,13 @@ scene many_spheres(bool bouncing) {
 	cam.defocus_angle = 0.6;
 	cam.focus_dist = 10.0;
 	
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 scene checkered_spheres() {
 	// World
 	hittable_list world;
+
 
 	shared_ptr<checker_texture> checker = make_shared<checker_texture>(0.32, colour(0.2, 0.3, 0.1), colour(0.9, 0.9, 0.9));
 	world.add(make_shared<sphere>(point3(0.0, -10.0, 0.0), 10.0, make_shared<lambertian>(checker)));
@@ -157,7 +159,7 @@ scene checkered_spheres() {
 
 	cam.defocus_angle = 0.0;
 	
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 scene earth() {
@@ -180,7 +182,7 @@ scene earth() {
 
 	cam.defocus_angle = 0.0;
 
-	return scene(cam, hittable_list(globe));
+	return scene(cam, hittable_list(globe), hittable_list());
 }
 
 scene perlin_spheres() {
@@ -206,7 +208,7 @@ scene perlin_spheres() {
 
 	cam.defocus_angle = 0.0;
 
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 scene quads() {
@@ -242,7 +244,7 @@ scene quads() {
 	cam.defocus_angle = 0.0;
 
 	
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 scene quads2() {
@@ -279,7 +281,7 @@ scene quads2() {
 
 	cam.defocus_angle = 0.0;
 
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 
@@ -304,19 +306,25 @@ scene mandelbrot() {
 
 	cam.defocus_angle = 0.0;
 
-	return scene(cam, world);
+	return scene(cam, world, hittable_list());
 }
 
 scene simple_light() {
 	hittable_list world;
+	hittable_list lights;
 
 	shared_ptr<noise_texture> pertex = make_shared<noise_texture>(4);
 	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertex)));
 	world.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertex)));
 
 	shared_ptr<diffuse_light> difflight = make_shared<diffuse_light>(colour(4, 4, 4));
-	world.add(make_shared<sphere>(point3(0, 7, 0), 2, difflight));
-	world.add(make_shared<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), difflight));
+	shared_ptr<sphere> sph = make_shared<sphere>(point3(0, 7, 0), 2, difflight);
+	world.add(sph);
+	lights.add(sph);
+	shared_ptr<quad> qd = make_shared<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), difflight);
+	world.add(qd);
+	lights.add(qd);
+
 
 	camera cam;
 
@@ -334,11 +342,12 @@ scene simple_light() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, world);
+	return scene(cam, world, lights);
 }
 
 scene cornell_box() {
 	hittable_list world;
+	hittable_list lights;
 
 	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
 	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
@@ -347,10 +356,13 @@ scene cornell_box() {
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
-	world.add(make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<quad> qd = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(qd);
+	lights.add(qd);
 
 	camera cam;
 
@@ -368,11 +380,12 @@ scene cornell_box() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, world);
+	return scene(cam, world, lights);
 }
 
 scene cornell_box2() {
 	hittable_list world;
+	hittable_list lights;
 
 	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
 	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
@@ -381,7 +394,6 @@ scene cornell_box2() {
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
-	world.add(make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
@@ -391,6 +403,10 @@ scene cornell_box2() {
 	shared_ptr<lambertian> blue = make_shared<lambertian>(colour(0.12, 0.45, 0.85));
 	world.add(make_shared<sphere>(point3(200, 50, 100), 50.0, blue));
 
+	shared_ptr<quad> qd = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(qd);
+	lights.add(qd);
+
 	camera cam;
 
 	cam.aspect_ratio = 1.0;
@@ -407,11 +423,12 @@ scene cornell_box2() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, world);
+	return scene(cam, world, lights);
 }
 
 scene cornell_box3() {
 	hittable_list world;
+	hittable_list lights;
 
 	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
 	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
@@ -420,7 +437,6 @@ scene cornell_box3() {
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
-	world.add(make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
@@ -437,6 +453,10 @@ scene cornell_box3() {
 	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
 	world.add(box2);
 
+	shared_ptr<quad> qd = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(qd);
+	lights.add(qd);
+
 	camera cam;
 
 	cam.aspect_ratio = 1.0;
@@ -453,11 +473,12 @@ scene cornell_box3() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, world);
+	return scene(cam, world, lights);
 }
 
 scene cornell_smoke() {
 	hittable_list world;
+	hittable_list lights;
 
 	shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
 	shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
@@ -466,7 +487,6 @@ scene cornell_smoke() {
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
-	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
@@ -478,8 +498,12 @@ scene cornell_smoke() {
 	shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
 	box2 = make_shared<rotate_y>(box2, -18);
 	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
-	world.add(make_shared<constant_medium>(box1, 0.01, colour(0, 0, 0)));
-	world.add(make_shared<constant_medium>(box2, 0.01, colour(1, 1, 1)));
+	//world.add(make_shared<constant_medium>(box1, 0.01, colour(0, 0, 0)));
+	//world.add(make_shared<constant_medium>(box2, 0.01, colour(1, 1, 1)));
+
+	shared_ptr<quad> qd = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+	world.add(qd);
+	lights.add(qd);
 
 	camera cam;
 
@@ -497,7 +521,7 @@ scene cornell_smoke() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, world);
+	return scene(cam, world, lights);
 }
 
 scene final_scene() {
@@ -519,10 +543,13 @@ scene final_scene() {
 	}
 
 	hittable_list world;
+	hittable_list lights;
 	world.add(make_shared<bvh_node>(boxes1));
 
 	shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
-	world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 300), light));
+	shared_ptr<quad> qd = make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 300), light);
+	world.add(qd);
+	lights.add(qd);
 
 	point3 center1 = point3(400, 400, 200);
 	point3 center2 = center1 + vec3(30, 0, 0);
@@ -534,9 +561,9 @@ scene final_scene() {
 
 	shared_ptr<sphere> boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
 	world.add(boundary);
-	world.add(make_shared<constant_medium>(boundary, 0.2, colour(0.2, 0.4, 0.9)));
+	//world.add(make_shared<constant_medium>(boundary, 0.2, colour(0.2, 0.4, 0.9)));
 	boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
-	world.add(make_shared<constant_medium>(boundary, 0.0001, colour(1, 1, 1)));
+	//world.add(make_shared<constant_medium>(boundary, 0.0001, colour(1, 1, 1)));
 
 	shared_ptr<lambertian> emat = make_shared<lambertian>(make_shared<image_texture>("earthmap.jpg"));
 	world.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
@@ -568,11 +595,12 @@ scene final_scene() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, world);
+	return scene(cam, world, lights);
 }
 
 scene glass_boxes() {
 	hittable_list world;
+	hittable_list lights;
 
 	const shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
 	const shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
@@ -588,6 +616,7 @@ scene glass_boxes() {
 
 	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
 	world.add(floor_light);
+	lights.add(floor_light);
 
 	constexpr int cube_depth = 5;
 	constexpr double box_size = 50;
@@ -629,6 +658,6 @@ scene glass_boxes() {
 
 	cam.defocus_angle = 0;
 
-	return scene(cam, hittable_list(make_shared<bvh_node>(world)));
+	return scene(cam, hittable_list(make_shared<bvh_node>(world)), lights);
 }
 #endif

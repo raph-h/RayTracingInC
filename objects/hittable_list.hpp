@@ -50,6 +50,9 @@ public:
 
 	vec3 random(const point3& origin) const override {
 		int int_size = int(objects.size());
+		if (int_size == 0) { // Empty list
+			return vec3(1, 0, 0);
+		}
 		return objects[random_int(0, int_size - 1)]->random(origin);
 	}
 private:

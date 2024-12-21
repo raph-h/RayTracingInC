@@ -55,8 +55,6 @@ PDF for importance sampling
 - Choosing a incorrect PDF will not ruin the render, but an incorrect scattering function will ruin a render
 - Most difficult bug in a Monte Carlo program - A bug that produces reasonable outputs
 
-
-
 - NaN never equals itself
 
 Potential improvements

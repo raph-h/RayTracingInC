@@ -10,7 +10,7 @@ public:
 	double aspect_ratio = 1; // Ratio of image width over height
 	int image_width = 100; // Rendered image width in pixel count
 	int samples_per_pixel = 10; // Count of random samples for each pixel
-	int max_depth = 10; // Maximum number of ray bounces into scene (prevents recusion)
+	int max_depth = 10; // Maximum number of ray bounces into scene (prevents recursion)
 	colour background_bottom = colour(1.0, 1.0, 1.0); // Scene background colour on the bottom
 	colour background_top = colour(0.5, 0.7, 1.0); // Scene background colour on the top
 
@@ -22,7 +22,7 @@ public:
 	double defocus_angle = 0; // Variation angle of rays through each pixel
 	double focus_dist = 10; // Distance from camera lookfrom point to plane of perfect focus
 
-	void render(const hittable& world, const hittable& lights) {
+	void render(const hittable& world, const hittable& lights, bool hasLights) {
 		initialize();
 
 		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -36,7 +36,7 @@ public:
 				for (int s_j = 0; s_j < sqrt_spp; s_j++) {
 					for (int s_i = 0; s_i < sqrt_spp; s_i++) {
 						ray r = get_ray(i, j, s_i, s_j);
-						pixel_colour += ray_colour(r, max_depth, world, lights);
+						pixel_colour += ray_colour(r, max_depth, world, lights, hasLights);
 					}
 				}
 				write_colour(std::cout, pixel_samples_scale * pixel_colour);
@@ -131,7 +131,7 @@ private:
 		return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
 	}
 
-	colour ray_colour(const ray& r, int depth, const hittable& world, const hittable& lights) const {
+	colour ray_colour(const ray& r, int depth, const hittable& world, const hittable& lights, bool hasLights) const {
 		// If we've exceeded the ray bounce limit, no more light is gathered
 		if (depth <= 0)
 			return colour(0, 0, 0);
@@ -152,17 +152,25 @@ private:
 		}
 
 		if (srec.skip_pdf) {
-			return srec.attenuation * ray_colour(srec.skip_pdf_ray, depth - 1, world, lights); // TODO: what about emission_colour
+			return srec.attenuation * ray_colour(srec.skip_pdf_ray, depth - 1, world, lights, hasLights) + emission_colour; // TODO: what about emission_colour
 		}
-		shared_ptr<hittable_pdf> light_ptr = make_shared<hittable_pdf>(lights, rec.p);
-		mixture_pdf p(light_ptr, srec.pdf_ptr);
 
-		ray scattered = ray(rec.p, p.generate(), r.time());
-		double pdf_value = p.value(scattered.direction());
+		ray scattered;
+		double pdf_value;
+		if (hasLights) { // Use lightpdf if it exists, if not, use old calculations
+			shared_ptr<hittable_pdf> light_ptr = make_shared<hittable_pdf>(lights, rec.p);
+			mixture_pdf p(light_ptr, srec.pdf_ptr);
+			scattered = ray(rec.p, p.generate(), r.time());
+			pdf_value = p.value(scattered.direction());
+		}
+		else {
+			scattered = ray(rec.p, srec.pdf_ptr->generate(), r.time());
+			pdf_value = srec.pdf_ptr->value(scattered.direction());
+		}
 
 		double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
 		
-		colour sample_colour = ray_colour(scattered, depth - 1, world, lights);
+		colour sample_colour = ray_colour(scattered, depth - 1, world, lights, hasLights);
 		colour scatter_colour = (srec.attenuation * scattering_pdf * sample_colour) / pdf_value;
 
 		return emission_colour + scatter_colour;

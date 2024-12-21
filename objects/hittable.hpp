@@ -33,9 +33,13 @@ public:
 
 	virtual aabb bounding_box() const = 0;
 
-	virtual double pdf_value(const point3& origin, const vec3& direction) const = 0;
+	virtual double pdf_value(const point3& origin, const vec3& direction) const {
+		return 0.0;
+	}
 
-	virtual vec3 random(const point3& origin) const = 0;
+	virtual vec3 random(const point3& origin) const {
+		return vec3(1, 0, 0);
+	}
 };
 // TODO: Implement scaling - Surface normal transformations will need to be researched
 class translate : public hittable {
@@ -58,14 +62,6 @@ public:
 	}
 
 	aabb bounding_box() const override { return bbox; }
-
-	double pdf_value(const point3& origin, const vec3& direction) const override {
-		return 0.0;
-	}
-
-	vec3 random(const point3& origin) const override {
-		return vec3(1, 0, 0);
-	}
 private:
 	shared_ptr<hittable> object;
 	vec3 offset;
@@ -126,14 +122,6 @@ public:
 	}
 
 	aabb bounding_box() const override { return bbox; }
-
-	double pdf_value(const point3& origin, const vec3& direction) const override {
-		return 0.0;
-	}
-
-	vec3 random(const point3& origin) const override {
-		return vec3(1, 0, 0);
-	}
 private:
 	shared_ptr<hittable> object;
 	double sin_theta;
