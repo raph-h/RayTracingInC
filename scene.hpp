@@ -498,8 +498,8 @@ scene cornell_smoke() {
 	shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
 	box2 = make_shared<rotate_y>(box2, -18);
 	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
-	//world.add(make_shared<constant_medium>(box1, 0.01, colour(0, 0, 0)));
-	//world.add(make_shared<constant_medium>(box2, 0.01, colour(1, 1, 1)));
+	world.add(make_shared<constant_medium>(box1, 0.01, colour(0, 0, 0)));
+	world.add(make_shared<constant_medium>(box2, 0.01, colour(1, 1, 1)));
 
 	shared_ptr<quad> qd = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
 	world.add(qd);
@@ -561,9 +561,9 @@ scene final_scene() {
 
 	shared_ptr<sphere> boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
 	world.add(boundary);
-	//world.add(make_shared<constant_medium>(boundary, 0.2, colour(0.2, 0.4, 0.9)));
+	world.add(make_shared<constant_medium>(boundary, 0.2, colour(0.2, 0.4, 0.9)));
 	boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
-	//world.add(make_shared<constant_medium>(boundary, 0.0001, colour(1, 1, 1)));
+	world.add(make_shared<constant_medium>(boundary, 0.0001, colour(1, 1, 1)));
 
 	shared_ptr<lambertian> emat = make_shared<lambertian>(make_shared<image_texture>("earthmap.jpg"));
 	world.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));

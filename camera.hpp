@@ -171,6 +171,9 @@ private:
 		double scattering_pdf = rec.mat_ptr->scattering_pdf(r, rec, scattered);
 		
 		colour sample_colour = ray_colour(scattered, depth - 1, world, lights, hasLights);
+		if (sample_colour.x() != sample_colour.x()) {
+			std::clog << scattered.time() << "\n";
+		}
 		colour scatter_colour = (srec.attenuation * sample_colour * scattering_pdf) / pdf_value;// * std::clamp(scattering_pdf / pdf_value, 0.0, 1.0); // Clamp the values 
 
 		return emission_colour + scatter_colour;

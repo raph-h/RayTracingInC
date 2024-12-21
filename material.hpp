@@ -200,7 +200,7 @@ public:
 	bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override {
 		srec.attenuation = tex->value(rec.u, rec.v, rec.p);
 		srec.pdf_ptr = make_shared<sphere_pdf>();
-		srec.skip_pdf = true;
+		srec.skip_pdf = false;
 		return true;
 	}
 
