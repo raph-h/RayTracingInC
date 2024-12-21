@@ -45,7 +45,7 @@ public:
 class translate : public hittable {
 public:
 	translate(shared_ptr<hittable> object, const vec3& offset) : object(object), offset(offset) {
-		bbox = object->bounding_box() + offset;
+		bbox = object->bounding_box().translate(offset);
 	}
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 		// Move the ray backwards by the offset
@@ -74,31 +74,7 @@ public:
 		double radians = degrees_to_radians(angle);
 		sin_theta = std::sin(radians);
 		cos_theta = std::cos(radians);
-		bbox = object->bounding_box();
-
-		point3 min(infinity, infinity, infinity);
-		point3 max(-infinity, -infinity, -infinity);
-
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				for (int k = 0; k < 2; k++) {
-					double x = i * bbox.x.max + (1 - i) * bbox.x.min;
-					double y = j * bbox.y.max + (1 - j) * bbox.y.min;
-					double z = k * bbox.z.max + (1 - k) * bbox.z.min;
-
-					double newx = cos_theta * x + sin_theta * z;
-					double newz = -sin_theta * x + cos_theta * z;
-
-					vec3 tester(newx, y, newz);
-
-					for (int c = 0; c < 3; c++) {
-						min[c] = std::min(min[c], tester[c]);
-						max[c] = std::max(max[c], tester[c]);
-					}
-				}
-			}
-		}
-		bbox = aabb(min, max);
+		bbox = object->bounding_box().rotate_y(angle);
 	}
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {

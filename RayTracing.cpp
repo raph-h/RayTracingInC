@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 {
 	// Time
 	const auto start_time = std::chrono::steady_clock::now();
+	std::clog << "C++ version: " << __cplusplus << "\n";
 	scene scene = SCENE_H::cornell_box2();;
 	
 	if (argc >= 2) {

@@ -30,7 +30,7 @@ public:
 
 	double value(const vec3& direction) const override {
 		double cosine_theta = dot(unit_vector(direction), uvw.w());
-		return std::fmax(0, cosine_theta / pi);
+		return std::fmax(DBL_EPSILON, cosine_theta / pi); // Fixes acne?
 	}
 
 	vec3 generate() const override {

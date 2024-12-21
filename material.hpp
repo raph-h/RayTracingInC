@@ -106,7 +106,13 @@ public:
 		vec3 reflected = reflect(r_in.direction(), rec.normal);
 		reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
 		
-		srec.attenuation = albedo;
+		//srec.attenuation = albedo; This is not accurate
+		// FIX for attenuation
+		vec3 unit_direction = unit_vector(r_in.direction());
+		double cos_theta = std::min(dot(-unit_direction, rec.normal), 1.0);
+		srec.attenuation = reflectance(cos_theta, albedo);
+
+
 		srec.pdf_ptr = nullptr;
 		srec.skip_pdf = true;
 		srec.skip_pdf_ray = ray(rec.p, reflected, r_in.time()); // Scattered
@@ -116,6 +122,15 @@ public:
 private:
 	colour albedo;
 	double fuzz;
+
+	static colour reflectance(double cosine, const colour& albedo) {
+		// Use Schlick's approximation for reflectance
+		const double alpha = 1 - cosine;
+		const double beta = alpha * alpha * alpha * alpha * alpha;
+		const colour white = colour(1, 1, 1);
+		// Schlick's approximation for metals
+		return albedo + (white - albedo) * beta;
+	}
 };
 
 class dielectric : public material {
