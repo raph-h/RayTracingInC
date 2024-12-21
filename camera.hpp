@@ -22,10 +22,10 @@ public:
 	double defocus_angle = 0; // Variation angle of rays through each pixel
 	double focus_dist = 10; // Distance from camera lookfrom point to plane of perfect focus
 
-	void render(const hittable& world, const hittable& lights, bool hasLights) {
+	void render(std::ostream& file, const hittable& world, const hittable& lights, bool hasLights) {
 		initialize();
 
-		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+		file << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 		for (int j = 0; j < image_height; j++)
 		{
 			std::clog << "\rScanlines remaining: " << (image_height - j) << " / " << image_height << " (" << (j * 100 / image_height) << "%)     " << std::flush;
@@ -39,7 +39,7 @@ public:
 						pixel_colour += ray_colour(r, max_depth, world, lights, hasLights);
 					}
 				}
-				write_colour(std::cout, pixel_samples_scale * pixel_colour);
+				write_colour(file, pixel_samples_scale * pixel_colour);
 			}
 		}
 		std::clog << "\rDone.                              \n";
@@ -152,7 +152,7 @@ private:
 		}
 
 		if (srec.skip_pdf) {
-			return srec.attenuation * ray_colour(srec.skip_pdf_ray, depth - 1, world, lights, hasLights) + emission_colour; // TODO: what about emission_colour
+			return srec.attenuation * ray_colour(srec.skip_pdf_ray, depth - 1, world, lights, hasLights) + emission_colour;
 		}
 
 		ray scattered;

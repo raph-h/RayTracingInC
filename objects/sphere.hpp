@@ -58,7 +58,7 @@ public:
 
 	double pdf_value(const point3& origin, const vec3& direction) const override {
 		// The method only works for stationary spheres
-		// TODO: find a way to have moving spheres?
+		// TODO: find a way to have moving spheres? p.s still works for some reason (i think)
 		hit_record rec;
 		if (!this->hit(ray(origin, direction), interval(0, infinity), rec))
 			return 0;

@@ -9,20 +9,20 @@
 #include "material.hpp"
 #include "objects/quad.hpp"
 #include "objects/sphere.hpp"
-#include "objects/box.hpp"
+#include "objects/model.hpp"
 #include "texture.hpp"
 
 class scene {
 public:
 	scene(camera cam, hittable_list world, hittable_list lights) : cam(cam), world(world), lights(lights) {}
 
-	void render() {
-		cam.render(world, lights, lights.objects.size() == 0 ? false : true);
+	void render(std::ostream& file) {
+		cam.render(file, world, lights, lights.objects.size() == 0 ? false : true);
 	}
-	void high_res_render(int samples) {
+	void high_res_render(std::ostream& file, int samples) {
 		cam.samples_per_pixel = samples;
 		cam.max_depth = 500;
-		cam.render(world, lights, lights.objects.size() == 0 ? false : true);
+		cam.render(file, world, lights, lights.objects.size() == 0 ? false : true);
 	}
 private:
 	camera cam;
@@ -650,6 +650,38 @@ scene glass_boxes() {
 	cam.max_depth = 100;
 	cam.background_bottom = colour(0, 0, 0);
 	cam.background_top = colour(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, hittable_list(make_shared<bvh_node>(world)), lights);
+}
+scene blender() {
+	hittable_list world;
+	hittable_list lights;
+
+	//const shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	const shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	//const shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	const shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
+	//const shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
+
+
+
+	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(floor_light);
+	lights.add(floor_light);
+
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
 
 	cam.vfov = 40;
 	cam.lookfrom = point3(278, 278, -800);

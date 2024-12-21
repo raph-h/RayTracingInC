@@ -13,7 +13,7 @@
 #include "material.hpp"
 #include "objects/quad.hpp"
 #include "objects/sphere.hpp"
-#include "objects/box.hpp"
+#include "objects/model.hpp"
 #include "texture.hpp"
 
 
@@ -22,10 +22,20 @@ int main(int argc, char *argv[])
 	// Time
 	const auto start_time = std::chrono::steady_clock::now();
 	std::clog << "C++ version: " << __cplusplus << "\n";
-	scene scene = SCENE_H::cornell_box2();;
 	
+	std::ofstream file;
 	if (argc >= 2) {
-		int value = atoi(argv[1]);
+		file.open(argv[1]);
+		std::clog << "Opened file: '" << argv[1] << "'\n";
+	}
+	else {
+		file.open("output.ppm");
+		std::clog << "Opened file: 'output.ppm'\n";
+	}
+
+	scene scene = SCENE_H::three_spheres();
+	if (argc >= 3) {
+		int value = atoi(argv[2]);
 		switch (value)
 		{
 		case 1:
@@ -78,14 +88,14 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
-	if (argc >= 3) {
-		int value = atoi(argv[2]);
-		scene.high_res_render(value);
+	if (argc >= 4) {
+		int value = atoi(argv[3]);
+		scene.high_res_render(file, value);
 	}
 	else {
-		scene.render();
+		scene.render(file);
 	}
-
+	file.close();
 	const auto end_time = std::chrono::steady_clock::now();
 	const auto elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	std::clog << "elapsed time: " << elapsed_seconds / 1000.0 << "s\n";
