@@ -70,10 +70,26 @@ inline shared_ptr<bvh_node> box(const point3& a, const point3& b, shared_ptr<mat
 #define MAX_VERTICES 65534
 
 // Imports a model (WIP)
-inline shared_ptr<bvh_node> model(const char fileName, shared_ptr<material> mat)
+inline shared_ptr<bvh_node> model(const char fileName[], const float scale, shared_ptr<material> mat)
 {
 	hittable_list finalModel;
 
+	std::ifstream file(fileName);
+	std::string buffer;
+	int vertexCount = 0;
+
+	if (file.is_open()) {
+		std::clog << "Opened file '" << fileName << "'\n";
+
+		while (file.good()) {
+			file >> buffer;
+			std::clog << buffer;
+		}
+		file.close();
+	}
+	else {
+		std::clog << "Couldn't open file '" << fileName << "'\n";
+	}
 	//sides.add(make_shared<quad>(point3(min.x(), min.y(), max.z()), dx, dy, mat)); // front
 	//sides.add(make_shared<quad>(point3(max.x(), min.y(), max.z()), -dz, dy, mat)); // right
 	//sides.add(make_shared<quad>(point3(max.x(), min.y(), min.z()), -dx, dy, mat)); // back

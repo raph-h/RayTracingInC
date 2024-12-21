@@ -23,14 +23,23 @@ int main(int argc, char *argv[])
 	const auto start_time = std::chrono::steady_clock::now();
 	std::clog << "C++ version: " << __cplusplus << "\n";
 	
+	// File output
 	std::ofstream file;
+	bool fileOpened = false;
 	if (argc >= 2) {
 		file.open(argv[1]);
-		std::clog << "Opened file: '" << argv[1] << "'\n";
+		std::clog << "Opened file: '" << argv[1] << "'";
 	}
 	else {
 		file.open("output.ppm");
-		std::clog << "Opened file: 'output.ppm'\n";
+		std::clog << "Opened file: 'output.ppm'";
+	}
+	if (file.is_open()) {
+		fileOpened = true;
+		std::clog << " successfully\n";
+	}
+	else {
+		std::clog << " unsuccessfully\n";
 	}
 
 	scene scene = SCENE_H::three_spheres();
@@ -83,6 +92,9 @@ int main(int argc, char *argv[])
 		case 15:
 			scene = SCENE_H::glass_boxes();
 			break;
+		case 16:
+			scene = SCENE_H::blender();
+			break;
 		default:
 			scene = SCENE_H::three_spheres();
 			break;
@@ -90,12 +102,23 @@ int main(int argc, char *argv[])
 	}
 	if (argc >= 4) {
 		int value = atoi(argv[3]);
-		scene.high_res_render(file, value);
+		if (fileOpened) {
+			scene.high_res_render(file, value);
+		} else {
+			scene.high_res_render(std::cout, value);
+		}
 	}
 	else {
-		scene.render(file);
+		if (fileOpened) {
+			scene.render(file);
+		} else {
+			scene.render(std::cout);
+		}
 	}
-	file.close();
+
+	if (fileOpened)
+		file.close();
+	
 	const auto end_time = std::chrono::steady_clock::now();
 	const auto elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	std::clog << "elapsed time: " << elapsed_seconds / 1000.0 << "s\n";
