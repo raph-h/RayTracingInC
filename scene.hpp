@@ -660,7 +660,8 @@ scene glass_boxes() {
 
 	return scene(cam, hittable_list(make_shared<bvh_node>(world)), lights);
 }
-scene blender() {
+
+scene bunny() {
 	hittable_list world;
 	hittable_list lights;
 
@@ -670,7 +671,7 @@ scene blender() {
 	const shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
 	//const shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
 
-	shared_ptr<hittable> model1 = model("../RayTracing/models/cuberot.obj", 100, white);
+	shared_ptr<hittable> model1 = model("../RayTracing/models/stanford-bunny.obj", 2000, white);
 	world.add(model1);
 	/*
 	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
@@ -685,7 +686,75 @@ scene blender() {
 	cam.max_depth = 100;
 
 	cam.vfov = 40;
-	cam.lookfrom = point3(-100, -100, -800);
+	cam.lookfrom = point3(-600, 200, 20);
+	cam.lookat = point3(0, 200, 20);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, hittable_list(make_shared<bvh_node>(world)), lights);
+}
+
+scene dragon() {
+	hittable_list world;
+	hittable_list lights;
+
+	//const shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	const shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	//const shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	const shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
+	//const shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
+
+	shared_ptr<hittable> model1 = model("../RayTracing/models/xyzrgb_dragon.obj", 4, white);
+	world.add(model1);
+	/*
+	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(floor_light);
+	lights.add(floor_light);
+	*/
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(0, 0, -1300);
+	cam.lookat = point3(0, 0, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	return scene(cam, hittable_list(make_shared<bvh_node>(world)), lights);
+}
+
+scene obj_test() {
+	hittable_list world;
+	hittable_list lights;
+
+	//const shared_ptr<lambertian> red = make_shared<lambertian>(colour(0.65, 0.05, 0.05));
+	const shared_ptr<lambertian> white = make_shared<lambertian>(colour(0.73, 0.73, 0.73));
+	//const shared_ptr<lambertian> green = make_shared<lambertian>(colour(0.12, 0.45, 0.15));
+	const shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
+	//const shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
+
+	shared_ptr<hittable> model1 = model("../RayTracing/models/xyzrgb_dragon.obj", 4, white);
+	world.add(model1);
+	/*
+	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(floor_light);
+	lights.add(floor_light);
+	*/
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 500;
+	cam.max_depth = 100;
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(0, 0, -1300);
 	cam.lookat = point3(0, 0, 0);
 	cam.vup = vec3(0, 1, 0);
 

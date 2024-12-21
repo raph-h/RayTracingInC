@@ -93,7 +93,13 @@ int main(int argc, char *argv[])
 			scene = SCENE_H::glass_boxes();
 			break;
 		case 16:
-			scene = SCENE_H::blender();
+			scene = SCENE_H::bunny();
+			break;
+		case 17:
+			scene = SCENE_H::dragon();
+			break;
+		case 18:
+			scene = SCENE_H::obj_test();
 			break;
 		default:
 			scene = SCENE_H::three_spheres();

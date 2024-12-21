@@ -69,9 +69,9 @@ inline shared_ptr<bvh_node> box(const point3& a, const point3& b, shared_ptr<mat
 	return make_shared<bvh_node>(sides);
 }
 
-#define MAX_VERTICES 65534
+#define MAX_VERTICES 131068
 
-// Imports a model (WIP)
+// Imports a model
 inline shared_ptr<bvh_node> model(const char filePath[], const float scale, shared_ptr<material> mat)
 {
 	hittable_list finalModel;
@@ -112,7 +112,10 @@ inline shared_ptr<bvh_node> model(const char filePath[], const float scale, shar
 					vec3Buffer[1] = stof(buffer) * scale;
 					file >> buffer;
 					vec3Buffer[2] = stof(buffer) * scale;
-					vertexArray[index] = vec3Buffer;
+					if (index < vertexCount) {
+						vertexArray[index] = vec3Buffer;
+					}
+					
 					index++;
 				}
 				else if (!buffer.compare("f")) {
@@ -124,6 +127,7 @@ inline shared_ptr<bvh_node> model(const char filePath[], const float scale, shar
 					file >> buffer;
 					v3 = stoi(buffer) - 1;
 					if (v1 < vertexCount && v2 < vertexCount && v3 < vertexCount) {
+						//TODO: fix math errors here
 						finalModel.add(make_shared<quad>(vertexArray[v1], vertexArray[v2] - vertexArray[v1], vertexArray[v3] - vertexArray[v1], mat));
 					}
 					else {
