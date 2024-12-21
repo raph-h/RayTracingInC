@@ -670,13 +670,13 @@ scene blender() {
 	const shared_ptr<diffuse_light> light = make_shared<diffuse_light>(colour(7, 7, 7));
 	//const shared_ptr<dielectric> glass = make_shared<dielectric>(1.5);
 
-	shared_ptr<hittable> model1 = model("./cube.obj", 1, white);
+	shared_ptr<hittable> model1 = model("../RayTracing/models/cuberot.obj", 100, white);
 	world.add(model1);
-
+	/*
 	const shared_ptr<quad> floor_light = make_shared<quad>(point3(343, 554, 443), vec3(-130, 0, 0), vec3(0, 0, -105), light);
 	world.add(floor_light);
 	lights.add(floor_light);
-
+	*/
 
 	camera cam;
 	cam.aspect_ratio = 1.0;
@@ -685,8 +685,8 @@ scene blender() {
 	cam.max_depth = 100;
 
 	cam.vfov = 40;
-	cam.lookfrom = point3(278, 278, -800);
-	cam.lookat = point3(278, 278, 0);
+	cam.lookfrom = point3(-100, -100, -800);
+	cam.lookat = point3(0, 0, 0);
 	cam.vup = vec3(0, 1, 0);
 
 	cam.defocus_angle = 0;
