@@ -112,7 +112,7 @@ private:
 };
 
 // Restore MSVC compiler warnings
-#ifdef _MSC_VER
+#ifndef _MSC_VER
 	#pragma warning (pop)
 #endif
 
