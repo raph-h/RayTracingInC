@@ -127,8 +127,7 @@ inline shared_ptr<bvh_node> model(const char filePath[], const float scale, shar
 					file >> buffer;
 					v3 = stoi(buffer) - 1;
 					if (v1 < vertexCount && v2 < vertexCount && v3 < vertexCount) {
-						//TODO: fix math errors here
-						finalModel.add(make_shared<quad>(vertexArray[v1], vertexArray[v2] - vertexArray[v1], vertexArray[v3] - vertexArray[v1], mat));
+						finalModel.add(make_shared<triangle>(vertexArray[v1], vertexArray[v2] - vertexArray[v1], vertexArray[v3] - vertexArray[v1], mat));
 					}
 					else {
 						std::clog << "More vertices referenced in face than counted\n";
